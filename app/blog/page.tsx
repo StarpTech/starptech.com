@@ -31,7 +31,7 @@ export default async function BlogPage() {
 					Engineer Journey
 					</h2>
 					<p className="mt-4 text-zinc-400">
-						Worth experiences and projects during my journey as an engineer.
+						Worth experiences and projects during my life as an engineer.
 					</p>
 				</div>
 				<div className="w-full h-px bg-zinc-800" />
