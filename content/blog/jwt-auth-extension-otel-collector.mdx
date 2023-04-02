@@ -1,0 +1,10 @@
+---
+title: "jwtauthextension"
+description: JWT Auth extension for the OTEL collector.
+date: "2023-03-29"
+pullRequestUrl: https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/20524
+published: true
+  
+---
+
+This extension authenticates users who want to send data to your collector with a JWT, enabling multi-tenant use cases easier. Based on the auth claims data, you can use a processor like [`attributesprocessor`](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/attributesprocessor) to filter or enrich the data. Authenticity is ensured by signing the JWT token with the same secret before.

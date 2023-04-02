@@ -1,0 +1,24 @@
+---
+title: "GraphQL registry"
+description: GraphQL registry - single source of truth for registering and tracking your graph.
+repository: StarpTech/FastGraph
+date: "2021-07-28"
+published: true
+  
+---
+
+A GraphQL registry written in Node.js.
+
+> There should be a **single source of truth** for registering and tracking the graph.
+
+## Features
+
+- Create multiple graphs (for example, staging and production, or different development branches)
+- Stores versioned schemas for all GraphQL-federated services
+- Serves schema for GraphQL gateway based on provided services & their versions
+- Serves a supergraph schema for the GraphQL gateway
+- Validates new schema to be compatible with other running services
+- Validates that all client operations are supported by your schema
+- Calculates a schema coverage report from GraphQL operations
+- Validates if a schema update produce a breaking, dangerous or safe change
+- Lightweight authorization concept based on JWT.

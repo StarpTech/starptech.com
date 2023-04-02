@@ -1,0 +1,34 @@
+---
+title: "Microservice framework for Node.js"
+description: Writing reliable & fault-tolerant microservices in Node.js
+repository: hemerajs/hemera
+date: "2018-04-04"
+published: true
+  
+---
+
+Hemera (/ˈhɛmərə/; Ancient Greek: Ἡμέρα [hɛːméra] "day") is a small wrapper around the official NATS driver. NATS is a simple, fast and reliable solution for the internal communication of a distributed system. It chooses simplicity and reliability over guaranteed delivery. We want to provide a toolkit to develop micro services in an easy and powerful way. We provide a pattern matching RPC style. You don't have to worry about the transport. NATS is powerful.
+
+With Hemera you have the best of both worlds. Efficient pattern matching to have the most flexibility in defining your RPC's. It doesn't matter where your server or client lives. You can start as many services you want on different hosts to ensure maximal availability. The only dependency you have is a single binary of \~10MB. Mind your own business NATS will do the rest for you:
+
+The key features of NATS in combination with Hemera are:
+
+* **Lightweight**: The Hemera core is small as possible and provide an extensive [plugin system](https://hemerajs.github.io/hemera/docs/plugin.html).
+* **Location transparency**: A service may be instantiated in different locations at different times. An application interacting with an service and does not know the service physical location.
+* **Service Discovery**: You don't need a service discovery all subscriptions are managed by NATS.
+* **Load Balancing**: Requests are load balanced (random) by NATS mechanism of "queue groups".
+* **Packages**: We provide reliable and modern plugins to the community.
+* **High performant**: NATS is able to handle million of requests per second.
+* **Scalability**: Filtering on the subject name enables services to divide work (perhaps with locality).
+* **Fault tolerance**: Auto-heals when new services are added. Configure cluster mode to be more reliable.
+* **Auto-pruning**: NATS automatically handles a slow consumer and cut it off.
+* **Pattern driven**: Define RPC's in JSON and use the flexibility of pattern-matching.
+* **Request & Reply**: By default point-to-point involves the fastest or first to respond.
+* **Publish & Subscribe**: Hemera supports all features of NATS. This includes wildcards in subjects and normal publish and fanout mechanism.
+* **Tracing**: Builtin tracing capabilities but we also provide plugin for [Jaeger](https://github.com/jaegertracing/jaeger).
+* **Monitoring**: NATS server can be monitored by cli or a dashboard.
+* **Payload validation**: Create your own validator or use existing plugins e.g [hemera-joi](https://github.com/hemerajs/hemera/tree/master/packages/hemera-joi) or [hemera-ajv](https://github.com/hemerajs/hemera/tree/master/packages/hemera-ajv).
+* **Serialization**: Use custom serializer e.g [hemera-mgspack](https://github.com/hemerajs/hemera/tree/master/packages/hemera-msgpack).
+* **Metadata**: Transfer metadata across services or attach contextual data to tracing systems.
+* **Dependencies**: NATS is a single binary of \~10MB and can be deployed in seconds.
+* **Typescript**: We provide typings.
