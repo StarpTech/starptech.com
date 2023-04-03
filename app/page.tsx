@@ -44,9 +44,15 @@ export default function Home() {
           </Link>
         </h2>
 		<div className="text-zinc-500 leading-relaxed text-sm md:text-md max-w-2xl text-center">
-          We're building the backend for frontend framework. Empower your
-          developers to streamline their integration workflows and focus on
-          delivering exceptional user experiences in record time.
+          We're building the <Link
+            target="_blank"
+            href="https://samnewman.io/patterns/architectural/bff/"
+            className="underline duration-500 hover:text-zinc-300"
+          >
+            backend for frontend
+          </Link>{" "}framework. Empower your
+          developers to streamline their integration workflows to provide a
+          unified data layer for all frontend frameworks.
 		</div>
       </div>
     </div>
