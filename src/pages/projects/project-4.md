@@ -1,7 +1,7 @@
 ---
 layout: ../../layouts/MarkdownWorksLayout.astro
 title: 'Microservice framework for Node.js'
-description: 'The GitOps workflow to manage Kubernetes applications at any scale.'
+description: 'Writing reliable & fault-tolerant microservices in Node.js'
 image:
     url: '/GitHub.webp'
     alt: 'GitHub wallpaper'
