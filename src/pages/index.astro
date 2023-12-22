@@ -3,8 +3,8 @@ import Layout from '../layouts/Layout.astro';
 const pageTitle = "Dustin Deus - Software Engineer"
 ---
 <Layout pageTitle={pageTitle}>
-    <div class="gif">
-        <img width="300" alt="technology" src="/tech.png"/>
+    <div class="profile">
+        <img height="230px" alt="technology" src="/profile.jpeg"/>
     </div>
     <h1>Dustin Deus</h1>
     <small>Co-Founder and Tech-Lead (WunderGraph)</small>
@@ -33,11 +33,20 @@ const pageTitle = "Dustin Deus - Software Engineer"
     /* small */
     small {
         background-color: #584966;
-        color: #fdebf3;
+        color: #fff;
         border-radius: 6px;
         font-family: 'Josefin Sans', sans-serif;
         font-weight: 600;
         padding: 0.3em 0.6em 0.2em;
+    }
+
+    .profile {
+        margin: 20px 0 0 0;
+        text-align: center;
+    }
+    .profile img {
+        border-radius: 50%;
+        padding: 30px;
     }
 
     /* Button */
@@ -45,7 +54,7 @@ const pageTitle = "Dustin Deus - Software Engineer"
         background: rgba(0,0,0,0);
         border: 2px solid #78c2ad;
         border-radius: 8px;
-        color: #fdebf3;
+        color: #fff;
         font: 600 16px 'Josefin Sans', sans-serif;
         padding: 8px 16px;
         transition: background-color 0.4s, color 0.4s;
