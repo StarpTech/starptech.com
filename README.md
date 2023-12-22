@@ -18,7 +18,7 @@ This is a portfolio template built using CSS, HTML, JavaScript, and Astro. It se
 Clone this repository to your local machine using Git.
 
 ```scheme
-git clone https://github.com/ttomczak3/Milky-Way.git
+git clone https://github.com/StarpTech/starptech.com.git
 cd Milky-Way
 ```
 
