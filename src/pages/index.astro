@@ -1,0 +1,76 @@
+---
+import Layout from '../layouts/Layout.astro';
+const pageTitle = "Dustin Deus - Software Engineer"
+---
+<Layout pageTitle={pageTitle}>
+    <div class="gif">
+        <img width="300" alt="technology" src="/tech.png"/>
+    </div>
+    <h1>Dustin Deus</h1>
+    <small>Co-Founder and Tech-Lead (WunderGraph)</small>
+    <h2>About</h2>
+    <p>
+        With over a decade of professional experience in software engineering and research, I specialize in designing and developing modern software solutions.
+        My passion thrives on engaging in challenging environments, tackling complex problems, and collaborating with brilliant minds.
+    </p>
+    <p>
+        Currently, I'm Co-Founder and Tech Lead at WunderGraph. I am responsible for driving the technical development of our GraphQL federation platform Cosmo and managing our team.
+        My role is focused on enhancing our product to become the go-to solution for companies aiming to integrate and scale their GraphQL APIs efficiently, regardless of whether they are running on-premises,
+        in the cloud, or on Kubernetes.
+    </p>
+    <div class="button">
+        <a href="/works/">
+            <button class="button">My portfolio</button>
+        </a>
+    </div>
+    <h2>Interests</h2>
+    <p>
+        In my free time, I enjoy collaborating with the open-source community. I am also the maintainer of several open-source projects.
+        Visit me on GitHub <a href="https://github.com/StarpTech">StarpTech</a>.
+    </p>
+</Layout>
+<style>
+    /* small */
+    small {
+        background-color: #584966;
+        color: #fdebf3;
+        border-radius: 6px;
+        font-family: 'Josefin Sans', sans-serif;
+        font-weight: 600;
+        padding: 0.3em 0.6em 0.2em;
+    }
+
+    /* Button */
+    button {
+        background: rgba(0,0,0,0);
+        border: 2px solid #78c2ad;
+        border-radius: 8px;
+        color: #fdebf3;
+        font: 600 16px 'Josefin Sans', sans-serif;
+        padding: 8px 16px;
+        transition: background-color 0.4s, color 0.4s;
+    }
+
+    button:hover {
+        background-color: #78c2ad;
+        color: #1e1e2e;
+        cursor: pointer;
+    }
+
+    .button {
+        text-align: center;
+    }
+
+    /* Skill images */
+    .link-images img {
+        margin: 16px 4px;
+    }
+
+    @media only screen and (max-width: 600px) {
+        .link-images img {
+            height: 30px;
+            width: 30px;
+            margin: 16px 1px;
+        }
+    }
+</style>

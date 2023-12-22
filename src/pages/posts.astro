@@ -1,0 +1,70 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Card from '../components/Card.astro';
+const pageTitle = "Posts";
+---
+<Layout pageTitle={pageTitle}>
+    <div class="gif">
+        <img width="300" height="259" alt="RaccoonLaptopGif" src="/blog.webp"/>
+    </div>
+    <h2>Blog</h2>
+    <ul role="list" class="link-card-grid">
+        <Card
+                url="https://wundergraph.com/blog/the_builder_the_road_from_commit_to_production_in_13s"
+                image="https://wundergraph.com/_next/image?url=%2Fimages%2Fblog%2Fdark%2Fthe_builder_the_road_from_commit_to_production_in_13s.png&w=384&q=100"
+                title="Serverless CI with Podman, Firecracker, fly.io Machines, and temporal.io"
+                body="This is the story of how we built the CI/CD system for WunderGraph Cloud. 13s builds on top of giants like fly.io Machines, Podman, and temporal.io."
+        />
+        <Card
+                url="https://wundergraph.com/blog/open_source_graphql_cdn_edge_cache_with_cloudflare_fastly_fly_io"
+                image="https://wundergraph.com/_next/image?url=%2Fimages%2Fblog%2Fdark%2Fthe_builder_the_road_from_commit_to_production_in_13s.png&w=384&q=100"
+                title="Open Source GraphQL CDN / Edge Cache with Cloudflare, Fastly, and Fly.io"
+                body="WunderGraph offers an Open Source Alternative to adding a GraphQL CDN / Edge Cache for your APIs that can leverage any Caching Service, like Cloudflare, fastly or even fly.io for Edge deployments."
+        />
+        <Card
+                url="https://wundergraph.com/blog/do_you_even_test"
+                image="https://wundergraph.com/_next/image?url=%2Fimages%2Fblog%2Fdark%2Fdo_you_even_test.png&w=1080&q=100"
+                title="Do you even test?"
+                body="Taking End-to-end Tests with Mocks for API Gateways to the next level. Testing is an important part of any software development process. At WunderGraph, we believe that testing should be easy and fun."
+        />
+        <Card
+                url="https://refreshmiami.com/wundergraph-raises-3m-to-power-the-api-revolution/"
+                image="/founders_wundergraph.jpeg"
+                title="WunderGraph raises $3M to power the API revolution"
+                body="If software is eating the world, APIs very well may be the dessert. Miami-based startup WunderGraph aims to make using APIs as easy and quick as possible."
+        />
+        <Card
+            url="https://dustindeus.medium.com/managed-kubernetes-cluster-ha-for-side-projects-47f74e2f9436"
+            image="/blog.png"
+            title="Managed Kubernetes Cluster (HA) for Side Projects"
+            body="If you want to orchestrate and scale containers you get in touch with Kubernetes someday."
+        />
+        <Card
+                url="https://dustindeus.medium.com/the-gitops-workflow-to-manage-kubernetes-applications-at-any-scale-3938134c8e03"
+                image="/blog.png"
+                title="GitOps workflow without controllers"
+                body="The GitOps workflow to manage Kubernetes applications at any scale."
+        />
+        <Card
+                url="https://dustindeus.medium.com/distributed-event-store-with-nats-streaming-43981cb19fe0"
+                image="/blog.png"
+                title="Distributed Event Store with NATS-Streaming"
+                body="Event-sourcing is gold. That’s true in many ways but it also costs me a lot of headaches to get on the right road."
+        />
+    </ul>
+    <h2>YouTube</h2>
+    <ul role="list" class="link-card-grid">
+        <Card
+            url="https://www.youtube.com/watch?v=m3YrZav5-CU"
+            image="https://i3.ytimg.com/vi/m3YrZav5-CU/maxresdefault.jpg"
+            title="Rethinking GraphQL with Wundergraph"
+            body="Have we been thinking about GraphQL all wrong? Could we just use GraphQL at build time? Let's find out as we explore Wundergraph and it's amazing aggregation system."
+        />
+        <Card
+            url="https://www.youtube.com/watch?v=nFqXOtztKg0"
+            image="https://i3.ytimg.com/vi/nFqXOtztKg0/maxresdefault.jpg"
+            title="Building WunderGraph Episode 1"
+            body="Since people really seem to like our build in public strategy and the weekly show & tell video sessions, we decided to take this concept one step further and talk about WunderGraph as a whole."
+        />
+    </ul>
+</Layout>
