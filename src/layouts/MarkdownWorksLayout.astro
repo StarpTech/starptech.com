@@ -4,14 +4,14 @@ const { frontmatter } = Astro.props;
 ---
 <BaseLayout pageTitle={frontmatter.title}>
     <div class="gif">
-        <img height="259" alt="RaccoonLaptopGif" src="/project.gif"/>
+        <img height="200px" alt="RaccoonLaptopGif" src="/project.gif"/>
     </div>
     <h2>{frontmatter.title}</h2>
     <slot />
     <p><small>PLATFORM</small>{frontmatter.platform}</p>
     <p><small>STACK</small>{frontmatter.stack}</p>
-    {frontmatter.website && <p><small>WEBSITE</small><a href={frontmatter.website} target="_blank">{frontmatter.website}</a></p>}
-    <p><small>GITHUB</small><a href={frontmatter.github} target="_blank">{frontmatter.github}</a></p>
+    {frontmatter.website && <p class="text-overflow"><small>WEBSITE</small><a href={frontmatter.website} target="_blank">{frontmatter.website}</a></p>}
+    <p class="text-overflow"><small>GITHUB</small><a href={frontmatter.github} target="_blank">{frontmatter.github}</a></p>
     <div class="img">
         <img src={frontmatter.worksImage1.url} alt={frontmatter.worksImage1.alt} />
         <img src={frontmatter.worksImage2.url} alt={frontmatter.worksImage2.alt} />

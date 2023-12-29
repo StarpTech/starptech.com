@@ -5,9 +5,10 @@ html {
 }
 
 body {
-    max-width: 540px;
+    max-width: 740px;
     margin: 0 auto;
     text-align: justify;
+    padding: 2rem;
 }
 
 /* Headings */
@@ -35,7 +36,12 @@ p {
     font-size: 1.1em;
     hyphens: auto;
     line-height: 1.5;
-    text-indent: 1em;
+}
+
+.text-overflow {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 
@@ -116,8 +122,8 @@ a {
 .link-card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
-    gap: 1rem;
-    padding: 0;
+    gap: 1.5rem;
+    padding: 1rem 0 0 0;
 }
 
 /* Theme Icon */
@@ -172,10 +178,6 @@ html.light {
 
 /* Media Query */
 @media only screen and (max-width: 600px) {
-    body {
-        width: 320px;
-    }
-
     .nav-bar {
         display: initial;
     }
