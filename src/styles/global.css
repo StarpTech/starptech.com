@@ -12,7 +12,7 @@ body {
 
 /* Headings */
 h1, h2 {
-    font-family: 'Pacifico', cursive;
+    font-family: 'Lato', sans-serif;
     font-weight: normal;
 }
 
@@ -31,7 +31,7 @@ h2 {
 
 /* Paragraphs */
 p {
-    font-family: 'Josefin Sans', sans-serif;
+    font-family: 'Lato', sans-serif;
     font-size: 1.1em;
     hyphens: auto;
     line-height: 1.5;
@@ -53,7 +53,7 @@ p {
 }
 
 .title-link, .nav-links {
-    font-family: 'Pacifico', cursive;
+    font-family: 'Lato', sans-serif;
     font-size: 1.3rem;
 }
 
@@ -69,7 +69,7 @@ p {
 }
 
 .nav-links {
-    font-family: 'Josefin Sans', sans-serif;
+    font-family: 'Lato', sans-serif;
     font-size: 1.1rem;
     text-align: right;
 }
