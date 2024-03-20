@@ -1,91 +1,126 @@
 ---
-import Layout from '../layouts/Layout.astro';
-const pageTitle = "Dustin Deus - Software Engineer"
+import Layout from "../layouts/Layout.astro";
+const pageTitle = "Dustin Deus - Software Engineer";
 ---
+
 <Layout pageTitle={pageTitle}>
-    <div class="profile">
-        <img height="230px" alt="technology" src="/profile.jpeg"/>
-    </div>
-    <h1>Dustin Deus</h1>
-    <small>Co-Founder and Tech-Lead (WunderGraph)</small>
-    <ul class="summary">
-        <li><p>10+ years of experience in software engineering, specializing in building web applications and backend systems</p></li>
-        <li><p>I’ve worked at companies small and large. From Jira to Linear 👾.</p></li>
-        <li><p>Raised $3m of venture capital to build <a href="https://wundergraph.com">WunderGraph</a></p></li>
-        <li><p>Lifting weights to stay healthy and fit 🏋️</p></li>
-    </ul>
-    <h2>More</h2>
-    <p>
-        Welcome to my personal blog! With a journey spanning over ten years in software engineering and research, I've developed a deep passion for crafting innovative software solutions that resonate with the latest market trends and needs. My career has been a thrilling adventure of tackling complex challenges (From Edge Caching in Rust to API Gateways and bootstrapping entire SaaS solutions like <a href="https://wundergraph.com/">Cosmo</a>), unwinding intricate problems (Serverless CI/CD), and joining forces with the most talented people in the industry across the globe.
-    </p>
-    <p>
-        At present, I hold the reins as the Co-Founder and Tech Lead at WunderGraph. Here, I play a crucial role in steering the technical direction of Cosmo, our revolutionary GraphQL federation platform. My responsibilities include leading our dynamic team and ensuring that our platform not only meets but sets new industry benchmarks. I am wholeheartedly committed to transforming our product into the go-to solution for businesses eager to effectively scale and integrate their GraphQL APIs across various environments, be it on-premises, cloud, or Kubernetes. This focus is a perfect match for the evolving market demand for flexible, scalable, and efficient software solutions.
-    </p>
-    <div class="button">
-        <a href="/works/">
-            <button class="button">Hand-Selected Works.</button>
-        </a>
-    </div>
-    <h2>Interests</h2>
-    <p>
-        In my free time, I enjoy collaborating with the open-source community. I am also the maintainer of several open-source projects.
-        Visit me on GitHub <a href="https://github.com/StarpTech">StarpTech</a>. Besides that, I love good food, go to the gym, and spending time with my soulmate.
-    </p>
+  <div class="profile">
+    <img height="230px" alt="technology" src="/profile.jpeg" />
+  </div>
+  <h1>Dustin Deus</h1>
+  <small>Co-Founder and Tech-Lead (WunderGraph)</small>
+  <ul class="summary">
+    <li>
+      <p>
+        10+ years of experience in software engineering, specializing in
+        building web applications and backend systems
+      </p>
+    </li>
+    <li>
+      <p>I’ve worked at companies small and large. From Jira to Linear 👾.</p>
+    </li>
+    <li>
+      <p>
+        Raised $3m of venture capital to build <a href="https://wundergraph.com"
+          >WunderGraph</a
+        >
+      </p>
+    </li>
+    <li><p>Lifting weights to stay healthy and fit 🏋️</p></li>
+  </ul>
+  <h2>More</h2>
+  <p>
+    Welcome to my blog! My name is Dustin, Co-Founder and Tech Lead at
+    WunderGraph, where we're shaping the future of how businesses use GraphQL
+    with our platform, <a href="https://cosmo-docs.wundergraph.com/">Cosmo</a>.
+    My role involves leading a talented team, guiding our technical vision. I'm
+    dedicated to making our platform the first choice for companies looking to
+    scale and weave their GraphQL APIs seamlessly, whether they're operating on
+    local servers, in the cloud, or using Kubernetes.
+  </p>
+  <p>
+    I've been navigating the software engineering and research world for over a
+    decade, nurturing a genuine enthusiasm for developing Open-Source software
+    that truly makes a difference. My professional journey has been filled with
+    exciting challenges. From building
+    <a href="https://bff-patterns.com/">Backend for Frontend's</a>, enhancing
+    API performance with GraphQL Edge Caching in Rust to simplifying API
+    integrations by building a programmable API-Gateway called <a
+      href="https://github.com/wundergraph/wundergraph">WunderGraph Gateway</a
+    >.
+  </p>
+  <div class="button">
+    <a href="/works/">
+      <button class="button">Hand-Selected Works.</button>
+    </a>
+  </div>
+  <h2>Interests</h2>
+  <p>
+    In my free time, I enjoy collaborating with the open-source community. I am
+    also the maintainer of several open-source projects. Visit me on GitHub <a
+      href="https://github.com/StarpTech">StarpTech</a
+    >. Besides that, I love good food, go to the gym, and spending time with my
+    soulmate.
+  </p>
 </Layout>
 <style>
-    /* small */
-    small {
-        background-color: #584966;
-        color: #fff;
-        border-radius: 6px;
-        font-family: 'Lato', sans-serif;
-        font-weight: 600;
-        padding: 0.3em 0.6em 0.2em;
-    }
+  /* small */
+  small {
+    background-color: #584966;
+    color: #fff;
+    border-radius: 6px;
+    font-family: "Lato", sans-serif;
+    font-weight: 600;
+    padding: 0.3em 0.6em 0.2em;
+  }
 
-    .profile {
-        margin: 20px 0 0 0;
-        text-align: center;
-    }
-    .profile img {
-        border-radius: 50%;
-        padding: 30px;
-    }
-    .summary {
-        margin: 2rem 0 2rem 0;
-    }
+  .profile {
+    margin: 20px 0 0 0;
+    text-align: center;
+  }
+  .profile img {
+    border-radius: 50%;
+    padding: 30px;
+  }
+  .summary {
+    margin: 2rem 0 2rem 0;
+  }
 
-    /* Button */
-    button {
-        background: rgba(0,0,0,0);
-        border: 2px solid #78c2ad;
-        border-radius: 8px;
-        color: #fff;
-        font: 600 16px 'Lato', sans-serif;
-        padding: 8px 16px;
-        transition: background-color 0.4s, color 0.4s;
-    }
+  /* Button */
+  button {
+    background: rgba(0, 0, 0, 0);
+    border: 2px solid #78c2ad;
+    border-radius: 8px;
+    color: #fff;
+    font:
+      600 16px "Lato",
+      sans-serif;
+    padding: 8px 16px;
+    transition:
+      background-color 0.4s,
+      color 0.4s;
+  }
 
-    button:hover {
-        background-color: #78c2ad;
-        color: #1e1e2e;
-        cursor: pointer;
-    }
+  button:hover {
+    background-color: #78c2ad;
+    color: #1e1e2e;
+    cursor: pointer;
+  }
 
-    .button {
-        text-align: center;
-    }
+  .button {
+    text-align: center;
+  }
 
-    /* Skill images */
+  /* Skill images */
+  .link-images img {
+    margin: 16px 4px;
+  }
+
+  @media only screen and (max-width: 600px) {
     .link-images img {
-        margin: 16px 4px;
+      height: 30px;
+      width: 30px;
+      margin: 16px 1px;
     }
-
-    @media only screen and (max-width: 600px) {
-        .link-images img {
-            height: 30px;
-            width: 30px;
-            margin: 16px 1px;
-        }
-    }
+  }
 </style>
