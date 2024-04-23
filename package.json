@@ -10,10 +10,10 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^4.0.8",
-    "postcss": "^8.4.32",
-    "autoprefixer": "^10.4.16",
-    "cssnano": "^6.0.2",
-    "cssnano-preset-advanced": "^6.0.2"
+    "astro": "^4.6.3",
+    "postcss": "^8.4.38",
+    "autoprefixer": "^10.4.19",
+    "cssnano": "^6.1.2",
+    "cssnano-preset-advanced": "^6.1.2"
   }
 }
