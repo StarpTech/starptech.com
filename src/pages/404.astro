@@ -1,44 +1,20 @@
 ---
-const description = "404";
-import '../styles/global.css';
+import Layout from "../layouts/Layout.astro";
+import Masthead from "../components/Masthead.astro";
 ---
-<section class="container404"></section>
-<div class="gif">
-    <img width="300" height="259" alt="Raccoon404Gif" src="/404.gif"/>
-</div>
-<h1>{ description }</h1>
-<span>It seems like you've wandered into the wrong forest!</span>
-<p>
-    <a href="/">Return Home</a>
-</p>
-<style>
-    body {
-        text-align: center;
-    }
 
-    .container404 {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        margin: 16%;
-    }
+<Layout
+  pageTitle="404 — Dustin Deus"
+  description="The requested page wasn't found."
+  robots="noindex, follow"
+>
+  <main class="page" id="content">
+    <Masthead active="home" />
 
-    h1 {
-        margin: 0 auto;
-        text-align: center;
-        border: 0;
-        font-size: 120px;
-        letter-spacing: 10px;
-
-    }
-
-    span {
-        color: #5C5B77;
-    }
-
-    a {
-        color: #78c2ad;
-        text-decoration: none;
-    }
-</style>
+    <article class="not-found">
+      <h1>404 — page not found.</h1>
+      <p>The URL you followed doesn't resolve to anything.</p>
+      <p><a href="/">← back home</a></p>
+    </article>
+  </main>
+</Layout>

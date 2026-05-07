@@ -1,0 +1,92 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Masthead from "../../components/Masthead.astro";
+import { getCollection, type CollectionEntry } from "astro:content";
+
+export async function getStaticPaths() {
+  const posts = (await getCollection("blog")).filter((p) => !p.data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<"blog">;
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString("en", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+const wordCount = post.body.split(/\s+/g).filter(Boolean).length;
+const readingMinutes = Math.max(1, Math.round(wordCount / 220));
+
+const mdHref = `/blog/${post.slug}.md`;
+---
+
+<Layout
+  pageTitle={`${post.data.title} — Dustin Deus`}
+  description={post.data.description}
+>
+  <main class="page" id="content">
+    <Masthead active="writing" />
+
+    <article class="post">
+      <div class="post__bar">
+        <a href="/blog" class="post__back" aria-label="Back to writing">
+          <span aria-hidden="true">←</span> writing
+        </a>
+
+        <button
+          class="post__copy"
+          type="button"
+          data-copy-md
+          data-md-url={mdHref}
+          aria-label="Copy this post as Markdown"
+        >
+          <svg
+            class="post__copy-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span data-copy-label>Copy as Markdown</span>
+        </button>
+      </div>
+
+      <header class="post__header">
+        <p class="post__meta">
+          <time datetime={post.data.date.toISOString()}>{fmt(post.data.date)}</time>
+          <span class="post__meta-sep" aria-hidden="true">·</span>
+          <span>{readingMinutes} min read</span>
+        </p>
+        <h1 class="post__title">{post.data.title}</h1>
+        <p class="post__lede">{post.data.description}</p>
+      </header>
+
+      <div class="post__body">
+        <Content />
+      </div>
+
+      <footer class="post__footer">
+        <a href="/blog" class="post__back-bottom">
+          <span aria-hidden="true">←</span> back to writing
+        </a>
+      </footer>
+    </article>
+  </main>
+</Layout>

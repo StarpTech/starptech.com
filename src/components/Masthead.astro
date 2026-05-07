@@ -1,0 +1,35 @@
+---
+import { getCollection } from "astro:content";
+
+interface Props {
+  /** Optional active section: "writing" highlights the writing link */
+  active?: "home" | "writing";
+}
+
+const { active = "home" } = Astro.props;
+
+// Hide the "writing" link entirely when no posts are published.
+// Drafts are filtered out at build, so this naturally collapses while
+// the blog is empty, and reappears the moment a post ships.
+const published = (await getCollection("blog")).filter((p) => !p.data.draft);
+const hasWriting = published.length > 0;
+---
+
+<header class="masthead">
+  <div class="masthead__left">
+    <a
+      href="/"
+      class:list={["masthead__name", { "is-active": active === "home" }]}
+    >dustin&nbsp;deus</a>
+    {hasWriting && (
+      <>
+        <span class="masthead__sep" aria-hidden="true">·</span>
+        <a
+          href="/blog"
+          class:list={["masthead__link", { "is-active": active === "writing" }]}
+        >writing</a>
+      </>
+    )}
+  </div>
+  <span class="masthead__role">co-founder &amp; cto, wundergraph</span>
+</header>

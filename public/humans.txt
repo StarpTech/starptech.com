@@ -1,0 +1,16 @@
+/* TEAM */
+    name:        Dustin Deus
+    role:        Co-founder & CTO, WunderGraph
+    contact:     deusdustin [at] gmail.com
+    site:        https://starptech.com
+    github:      @StarpTech
+    linkedin:    /in/dustin-deus
+
+/* SITE */
+    runtime:     astro 4 + vanilla css
+    fonts:       geist + geist mono (self-hosted, latin subset)
+    js:          theme toggle + ambient three.js signal field
+    analytics:   none
+    cookies:     none
+
+  // shipped with taste. no frameworks were harmed.

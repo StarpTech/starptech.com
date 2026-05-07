@@ -1,0 +1,57 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Masthead from "../../components/Masthead.astro";
+import { getCollection } from "astro:content";
+
+const posts = (await getCollection("blog"))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString("en", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+---
+
+<Layout
+  pageTitle="Writing — Dustin Deus"
+  description="Notes on infrastructure, federated GraphQL, and shipping software."
+>
+  <main class="page" id="content">
+    <Masthead active="writing" />
+
+    <article class="writing-index">
+      <header class="writing-index__header">
+        <p class="writing-index__eyebrow">writing</p>
+        <h1 class="writing-index__title">
+          Notes on infrastructure, GraphQL, and shipping software.
+        </h1>
+      </header>
+
+      {
+        posts.length === 0 ? (
+          <p class="writing-index__empty">Nothing published yet.</p>
+        ) : (
+          <ul class="writing-list" role="list">
+            {posts.map((post) => (
+              <li class="writing-list__item">
+                <a href={`/blog/${post.slug}/`} class="writing-list__link">
+                  <time class="writing-list__date" datetime={post.data.date.toISOString()}>
+                    {fmt(post.data.date)}
+                  </time>
+                  <div class="writing-list__copy">
+                    <h2 class="writing-list__title">{post.data.title}</h2>
+                    <p class="writing-list__description">{post.data.description}</p>
+                  </div>
+                  <span class="writing-list__arrow" aria-hidden="true">→</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </article>
+  </main>
+</Layout>

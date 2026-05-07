@@ -1,46 +1,159 @@
 ---
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-import { ViewTransitions } from 'astro:transitions';
-import '../styles/global.css';
-const { pageTitle } = Astro.props;
+import Footer from "../components/Footer.astro";
+import ThemeToggle from "../components/ThemeToggle.astro";
+import "../styles/global.css";
+
+interface Props {
+  pageTitle?: string;
+  description?: string;
+  robots?: string;
+  signalField?: boolean;
+}
+
+const {
+  pageTitle = "Dustin Deus",
+  description = "Dustin Deus — co-founder & CTO at WunderGraph, building developer infrastructure for federated GraphQL.",
+  robots = "index, follow",
+  signalField = false,
+} = Astro.props;
+
+const site = Astro.site ?? new URL(Astro.url.origin);
+const canonical = new URL(Astro.url.pathname, site).toString();
+const ogImage = new URL("/builder-background.webp", site).toString();
+
+/** Markdown counterpart of the current page, for LLM ingestion.
+ *  - `/`              → `/index.md`
+ *  - `/blog/`         → `/blog.md`
+ *  - `/blog/<slug>/`  → `/blog/<slug>.md`
+ *  - `/404`           → no alternate
+ */
+function markdownAlternate(pathname: string): string | null {
+  if (pathname.startsWith("/404")) return null;
+  const clean = pathname.replace(/\/$/, "");
+  if (clean === "") return "/index.md";
+  if (clean === "/blog") return "/blog.md";
+  if (clean.startsWith("/blog/")) return `${clean}.md`;
+  return null;
+}
+const mdPath = markdownAlternate(Astro.url.pathname);
+const mdUrl = mdPath ? new URL(mdPath, site).toString() : null;
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Dustin Deus",
+  givenName: "Dustin",
+  familyName: "Deus",
+  alternateName: "StarpTech",
+  jobTitle: "Co-Founder and CTO",
+  description,
+  email: "mailto:deusdustin@gmail.com",
+  image: ogImage,
+  worksFor: {
+    "@type": "Organization",
+    name: "WunderGraph",
+    url: "https://wundergraph.com",
+  },
+  url: canonical,
+  sameAs: [
+    "https://github.com/StarpTech",
+    "https://www.linkedin.com/in/dustin-deus/",
+    "https://wundergraph.com",
+  ],
+};
 ---
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="en">
-	<head>
-        <meta charset="utf-8" />
-        <meta name="description" content="My Personal Website. Co-Founder and Tech-Lead at WunderGraph.">
-        <meta name="viewport" content="width=device-width" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="preload" href="https://fonts.googleapis.com/css2?family=Lato&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-        <noscript><link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet"></noscript>
-        <meta name="generator" content={Astro.generator} />
-        <title>{pageTitle}</title>
-        <ViewTransitions />
-	</head>
-	<body>
-        <Header />
-        <main>
-	    <slot />
-            <Footer />
-        </main>
-        <script>
-            function colorMode() {
-                if (
-                    localStorage.theme === "light" ||
-                    (!("theme" in localStorage) &&
-                    window.matchMedia("(prefers-color-scheme: light)").matches)
-                ) {
-                    document.documentElement.classList.add("light");
-                } else {
-                    document.documentElement.classList.remove("light");
-                }
-              }
-            
-            colorMode();
-            document.addEventListener('astro:after-swap', colorMode);
-        </script>
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="description" content={description} />
+    <meta name="robots" content={robots} />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
+    <meta name="generator" content={Astro.generator} />
+
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
+    <link rel="mask-icon" href="/icon-mask.svg" color="#2563eb" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    {mdUrl && (
+      <link rel="alternate" type="text/markdown" href={mdUrl} title="Markdown" />
+    )}
+
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/Geist-Regular.woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/Geist-SemiBold.woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/GeistMono-Regular.woff2"
+      crossorigin
+    />
+
+    <title>{pageTitle}</title>
+
+    <meta property="og:type" content="profile" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="Dustin Deus" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1664" />
+    <meta property="og:image:height" content="936" />
+    <meta property="profile:first_name" content="Dustin" />
+    <meta property="profile:last_name" content="Deus" />
+    <meta property="profile:username" content="StarpTech" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:creator" content="@StarpTech" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <script is:inline>
+      try {
+        const saved = localStorage.getItem("theme");
+        if (saved === "dark" || saved === "light") {
+          document.documentElement.dataset.theme = saved;
+        } else {
+          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          if (prefersDark) document.documentElement.dataset.theme = "dark";
+        }
+      } catch {}
+    </script>
+
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+  </head>
+  <body>
+    {signalField && (
+      <div class="signal-field" aria-hidden="true">
+        <canvas id="signalField"></canvas>
+      </div>
+    )}
+    <slot />
+    <Footer />
+    <ThemeToggle />
+    <script>
+      import "../scripts/agent.client.ts";
+      import "../scripts/signal-field.client.ts";
+    </script>
+  </body>
 </html>
