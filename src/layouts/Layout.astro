@@ -12,7 +12,7 @@ interface Props {
 
 const {
   pageTitle = "Dustin Deus",
-  description = "Dustin Deus — co-founder & CTO at WunderGraph, building developer infrastructure for federated GraphQL.",
+  description = "Dustin Deus — founder and engineer. Former co-founder & CTO at WunderGraph. Now Principal Engineer at OpenCode.",
   robots = "index, follow",
   signalField = false,
 } = Astro.props;
@@ -45,19 +45,20 @@ const structuredData = {
   givenName: "Dustin",
   familyName: "Deus",
   alternateName: "StarpTech",
-  jobTitle: "Co-Founder and CTO",
+  jobTitle: "Principal Engineer",
   description,
   email: "mailto:deusdustin@gmail.com",
   image: ogImage,
   worksFor: {
     "@type": "Organization",
-    name: "WunderGraph",
-    url: "https://wundergraph.com",
+    name: "OpenCode",
+    url: "https://opencode.ai/",
   },
   url: canonical,
   sameAs: [
     "https://github.com/StarpTech",
     "https://www.linkedin.com/in/dustin-deus/",
+    "https://opencode.ai/",
     "https://wundergraph.com",
   ],
 };

@@ -2,23 +2,26 @@ import type { APIRoute } from "astro";
 
 const md = `# Dustin Deus
 
-> Co-founder & CTO at WunderGraph. Builds developer infrastructure for federated GraphQL, distributed systems, and modern API platforms.
+> Founder and engineer. Former co-founder & CTO at WunderGraph. Now Principal Engineer at OpenCode, building open-source AI developer tools.
 
 **Fifteen years of shipping. Still finding new ways to be wrong.**
 
-Co-founder and CTO at [WunderGraph](https://wundergraph.com), where we build the production-grade platform modern engineering teams use to design, deploy, and operate federated GraphQL at scale.
+I co-founded [WunderGraph](https://wundergraph.com) and helped build it from an idea into a real company. We raised our Seed round, failed with the first product, built Cosmo in four weeks, survived, raised our Series A, and found our way to a platform used by teams at eBay, SoundCloud, Paramount, and others to integrate, collaborate on, and operate APIs at scale, today driving tens of billions of requests.
 
-Started in open source; one of those projects turned into the company. Still mostly in open source — the compounding interest of building in public has been the best thing about my career.
+As a first-time founder, that journey changed how I build. I hired every engineer myself and helped shape a culture around ego-less collaboration, openness, ownership, and high standards. Building something from scratch that supports dozens of people and their families is hard to describe. It stays with you.
 
-Outside the company, I'm always on the edge — learning, writing occasionally, and studying how developer tooling has to evolve as AI agents become first-class primitives in every workflow.
+Now I'm a Principal Engineer at [OpenCode](https://opencode.ai/). AI is changing how software gets written, shipped, and maintained. I want developers to keep control: choose their models, own their stack, protect their data, and optimize costs without getting locked into closed ecosystems.
 
-Small ships, tight feedback loops, durable systems.
+## Operating System
+
+Developer tooling / infrastructure / small teams / open source / tight feedback loops / durable systems.
 
 ## Contact
 
 - GitHub: <https://github.com/StarpTech>
 - LinkedIn: <https://www.linkedin.com/in/dustin-deus/>
 - Email: <deusdustin@gmail.com>
+- OpenCode: <https://opencode.ai/>
 - WunderGraph: <https://wundergraph.com>
 `;
 
