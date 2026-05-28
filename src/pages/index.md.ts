@@ -12,9 +12,7 @@ As a first-time founder, that journey changed how I build. I hired every enginee
 
 Now I'm a Principal Engineer at [OpenCode](https://opencode.ai/). AI is changing how software gets written, shipped, and maintained. I want developers to keep control: choose their models, own their stack, protect their data, and optimize costs without getting locked into closed ecosystems.
 
-## Operating System
-
-Developer tooling / infrastructure / small teams / open source / tight feedback loops / durable systems.
+Notes on infrastructure, shipping software, and startups.
 
 ## Contact
 

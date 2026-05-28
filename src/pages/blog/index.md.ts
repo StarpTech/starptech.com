@@ -18,7 +18,7 @@ export const GET: APIRoute = async ({ site }) => {
 
   const md = `# Writing — Dustin Deus
 
-Notes on infrastructure, GraphQL, and shipping software.
+Notes on infrastructure, shipping software, and startups.
 
 ## Posts
 

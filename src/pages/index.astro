@@ -5,91 +5,111 @@ import { getCollection } from "astro:content";
 
 const pageTitle = "Dustin Deus";
 const pageDescription =
-  "Dustin Deus — founder and engineer. Former co-founder & CTO at WunderGraph. Now Principal Engineer at OpenCode, building open-source AI developer tools.";
+    "Dustin Deus — founder and engineer. Former co-founder & CTO at WunderGraph. Now Principal Engineer at OpenCode, building open-source AI developer tools.";
 
 const posts = (await getCollection("blog"))
-  .filter((p) => !p.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+    .filter((p) => !p.data.draft)
+    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const latest = posts[0];
 
 const fmt = (d: Date) =>
-  d.toLocaleDateString("en", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+    d.toLocaleDateString("en", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+    });
 ---
 
 <Layout pageTitle={pageTitle} description={pageDescription} signalField>
-  <main class="page" id="content">
-    <Masthead active="home" />
+    <main class="page" id="content">
+        <Masthead active="home" />
 
-    <article>
-      <a class="now" href="https://opencode.ai/" target="_blank" rel="noreferrer">
-        <span class="now__dot" aria-hidden="true"></span>
-        <span>building at OpenCode</span>
-      </a>
+        <article>
+            <a
+                class="now"
+                href="https://opencode.ai/"
+                target="_blank"
+                rel="noreferrer"
+            >
+                <span class="now__dot" aria-hidden="true"></span>
+                <span>building at OpenCode</span>
+            </a>
 
-      <p class="lede">Fifteen years of shipping. Still finding new ways to be wrong.</p>
+            <p class="lede">
+                Fifteen years of shipping. Still finding new ways to be wrong.
+            </p>
 
-      <p>
-        I co-founded
-        <a href="https://wundergraph.com" target="_blank" rel="noreferrer">WunderGraph</a>
-        and helped build it from an idea into a real company. We raised our
-        Seed round, failed with the first product, built Cosmo in four weeks,
-        survived, raised our Series A, and found our way to a platform used by
-        teams at eBay, SoundCloud, Paramount, and others to integrate,
-        collaborate on, and operate APIs at scale, today driving tens of
-        billions of requests.
-      </p>
+            <p>
+                I co-founded
+                <a
+                    href="https://wundergraph.com"
+                    target="_blank"
+                    rel="noreferrer">WunderGraph</a
+                >
+                and helped build it from an idea into a real company. We raised our
+                Seed round, failed with the first product, built Cosmo in four weeks,
+                survived, raised our Series A, and found our way to a platform used
+                by teams at eBay, SoundCloud, Paramount, and others to integrate,
+                collaborate on, and operate APIs at scale, today driving tens of billions
+                of requests.
+            </p>
 
-      <p>
-        As a first-time founder, that journey changed how I build. I hired
-        every engineer myself and helped shape a culture around ego-less
-        collaboration, openness, ownership, and high standards. Building
-        something from scratch that supports dozens of people and their
-        families is hard to describe. It stays with you.
-      </p>
+            <p>
+                As a first-time founder, that journey changed how I build. I
+                hired every engineer myself and helped shape a culture around
+                ego-less collaboration, openness, ownership, and high standards.
+                Building something from scratch that supports dozens of people
+                and their families is hard to describe. It stays with you.
+            </p>
 
-      <p>
-        Now I'm a Principal Engineer at
-        <a href="https://opencode.ai/" target="_blank" rel="noreferrer">OpenCode</a>.
-        AI is changing how software gets written, shipped, and maintained. I
-        want developers to keep control: choose their models, own their stack,
-        protect their data, and optimize costs without getting locked into
-        closed ecosystems.
-      </p>
+            <p>
+                Now I'm a Principal Engineer at
+                <a href="https://opencode.ai/" target="_blank" rel="noreferrer"
+                    >OpenCode</a
+                >. AI is changing how software gets written, shipped, and
+                maintained. I want developers to keep control: choose their
+                models, own their stack, protect their data, and optimize costs
+                without getting locked into closed ecosystems.
+            </p>
 
-      <aside class="principles" aria-label="Operating principles">
-        <span class="principles__label">Operating system</span>
-        <p class="principles__line">
-          <span>Developer tooling</span>
-          <span>Infrastructure</span>
-          <span>Small teams</span>
-          <span>Open source</span>
-          <span>Tight feedback loops</span>
-          <span>Durable systems</span>
-        </p>
-      </aside>
+            <p class="contact">
+                Want to talk infrastructure, startups, or what's next for
+                developer tools — <a
+                    href="https://github.com/StarpTech"
+                    target="_blank"
+                    rel="noreferrer">github</a
+                >,
+                <a
+                    href="https://www.linkedin.com/in/dustin-deus/"
+                    target="_blank"
+                    rel="noreferrer">linkedin</a
+                >, or <a href="mailto:deusdustin@gmail.com">email</a>.
+            </p>
 
-      <p class="contact">
-        Want to talk infrastructure, startups, or what's next for developer
-        tools — <a href="https://github.com/StarpTech" target="_blank" rel="noreferrer">github</a>,
-        <a href="https://www.linkedin.com/in/dustin-deus/" target="_blank" rel="noreferrer">linkedin</a>,
-        or <a href="mailto:deusdustin@gmail.com">email</a>.
-      </p>
-
-      {latest && (
-        <section class="home-writing" aria-labelledby="home-writing-title">
-          <h2 class="home-writing__title" id="home-writing-title">Writing</h2>
-          <p class="latest">
-            Latest:
-            <a href={`/blog/${latest.slug}/`}>{latest.data.title}</a>
-            <span class="latest__sep" aria-hidden="true">·</span>
-            <time datetime={latest.data.date.toISOString()}>{fmt(latest.data.date)}</time>
-          </p>
-        </section>
-      )}
-    </article>
-  </main>
+            {
+                latest && (
+                    <section
+                        class="home-writing"
+                        aria-labelledby="home-writing-title"
+                    >
+                        <h2 class="home-writing__title" id="home-writing-title">
+                            Writing
+                        </h2>
+                        <p class="latest">
+                            Latest:
+                            <a href={`/blog/${latest.slug}/`}>
+                                {latest.data.title}
+                            </a>
+                            <span class="latest__sep" aria-hidden="true">
+                                ·
+                            </span>
+                            <time datetime={latest.data.date.toISOString()}>
+                                {fmt(latest.data.date)}
+                            </time>
+                        </p>
+                    </section>
+                )
+            }
+        </article>
+    </main>
 </Layout>
