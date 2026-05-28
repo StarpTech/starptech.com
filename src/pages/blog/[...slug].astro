@@ -29,6 +29,11 @@ const wordCount = post.body.split(/\s+/g).filter(Boolean).length;
 const readingMinutes = Math.max(1, Math.round(wordCount / 220));
 
 const mdHref = `/blog/${post.slug}.md`;
+const site = Astro.site ?? new URL(Astro.url.origin);
+const postUrl = new URL(`/blog/${post.slug}/`, site).toString();
+const shareText = `${post.data.title} — Dustin Deus`;
+const xShareHref = `https://x.com/intent/tweet?url=${encodeURIComponent(postUrl)}&text=${encodeURIComponent(shareText)}`;
+const linkedInShareHref = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`;
 ---
 
 <Layout
@@ -86,6 +91,11 @@ const mdHref = `/blog/${post.slug}.md`;
         <a href="/blog" class="post__back-bottom">
           <span aria-hidden="true">←</span> back to writing
         </a>
+        <div class="post__share" aria-label="Share this post">
+          <span>share</span>
+          <a href={xShareHref} target="_blank" rel="noreferrer">X</a>
+          <a href={linkedInShareHref} target="_blank" rel="noreferrer">LinkedIn</a>
+        </div>
       </footer>
     </article>
   </main>
