@@ -1038,8 +1038,26 @@ article b {
   transform-origin: left;
 }
 
+.viz-link::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -0.12rem;
+  width: 0;
+  height: 0;
+  border-top: 0.22rem solid transparent;
+  border-bottom: 0.22rem solid transparent;
+  border-left: 0.34rem solid var(--viz-line);
+  transform: translateY(-50%);
+}
+
 .inference-viz.is-active .viz-link::before {
   animation: vizLineX 1.4s ease-out both;
+}
+
+.inference-viz.is-active .viz-link::after {
+  border-left-color: var(--viz-accent);
+  animation: vizArrowPulse 1.4s ease-out both;
 }
 
 .viz-packet {
@@ -1141,22 +1159,28 @@ article b {
 
 .viz-router-core::before,
 .viz-router-core::after {
-  content: "";
+  content: "->";
   position: absolute;
   left: -0.75rem;
   width: 0.75rem;
-  height: 1px;
-  background: repeating-linear-gradient(90deg, transparent 0 2px, var(--viz-accent) 2px 5px);
+  height: 1rem;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  line-height: 1;
+  color: var(--viz-accent);
+  text-align: right;
   transform: scaleX(0);
   transform-origin: left;
 }
 
 .viz-router-core::before {
   top: 30%;
+  margin-top: -0.5rem;
 }
 
 .viz-router-core::after {
   top: 67%;
+  margin-top: -0.5rem;
 }
 
 .inference-viz.is-active .viz-router-core::before,
@@ -1215,13 +1239,17 @@ article b {
 }
 
 .viz-worker.is-selected::before {
-  content: "";
+  content: "↓";
   position: absolute;
   top: -0.75rem;
   left: 50%;
-  width: 2px;
+  width: 1rem;
   height: 0.75rem;
-  background: repeating-linear-gradient(180deg, var(--viz-accent) 0 4px, transparent 4px 7px);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  line-height: 0.75rem;
+  color: var(--viz-accent);
+  text-align: center;
   transform: scaleY(0);
   transform-origin: top;
 }
@@ -1394,6 +1422,16 @@ article b {
   }
 }
 
+@keyframes vizArrowPulse {
+  0%,
+  45% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 @media (max-width: 540px) {
   .post__body .inference-viz {
     margin-right: 0;
@@ -1414,11 +1452,30 @@ article b {
     width: 2px;
     height: 1.6rem;
     justify-self: center;
+    background: repeating-linear-gradient(180deg, var(--viz-line) 0 4px, transparent 4px 7px);
   }
 
   .viz-link::before {
+    background: repeating-linear-gradient(180deg, var(--viz-accent) 0 4px, transparent 4px 7px);
     transform: scaleY(0);
     transform-origin: top;
+  }
+
+  .viz-link::after {
+    top: auto;
+    right: auto;
+    bottom: -0.12rem;
+    left: 50%;
+    border-top: 0.34rem solid var(--viz-line);
+    border-right: 0.22rem solid transparent;
+    border-bottom: 0;
+    border-left: 0.22rem solid transparent;
+    transform: translateX(-50%);
+  }
+
+  .inference-viz.is-active .viz-link::after {
+    border-top-color: var(--viz-accent);
+    border-left-color: transparent;
   }
 
   .inference-viz.is-active .viz-link::before {
