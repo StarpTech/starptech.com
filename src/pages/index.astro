@@ -80,12 +80,15 @@ const fmt = (d: Date) =>
       </p>
 
       {latest && (
-        <p class="latest">
-          Latest:
-          <a href={`/blog/${latest.slug}/`}>{latest.data.title}</a>
-          <span class="latest__sep" aria-hidden="true">·</span>
-          <time datetime={latest.data.date.toISOString()}>{fmt(latest.data.date)}</time>
-        </p>
+        <section class="home-writing" aria-labelledby="home-writing-title">
+          <h2 class="home-writing__title" id="home-writing-title">Writing</h2>
+          <p class="latest">
+            Latest:
+            <a href={`/blog/${latest.slug}/`}>{latest.data.title}</a>
+            <span class="latest__sep" aria-hidden="true">·</span>
+            <time datetime={latest.data.date.toISOString()}>{fmt(latest.data.date)}</time>
+          </p>
+        </section>
       )}
     </article>
   </main>
