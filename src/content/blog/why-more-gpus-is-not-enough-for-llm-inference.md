@@ -72,7 +72,10 @@ curl http://localhost:30000/v1/chat/completions \
   -d '{
     "model": "deepseek-v4-flash",
     "messages": [
-      {"role": "user", "content": "Continue this debugging session."}
+      {"role": "system", "content": "You are a concise debugging assistant."},
+      {"role": "user", "content": "We are investigating high TTFT in the inference service."},
+      {"role": "assistant", "content": "The first thing I would check is prefix-cache hit rate by worker."},
+      {"role": "user", "content": "Continue from there."}
     ],
     "routed_dp_rank": 0
   }'
