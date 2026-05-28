@@ -39,7 +39,7 @@ The important part is not H200 versus B200 as hardware. A B200 setup with `DP=1`
         <span class="viz-cache-dot"></span>
         <span class="viz-cache-dot"></span>
       </div>
-      <small>one cache domain</small>
+      <small>one domain</small>
     </div>
     <div class="viz-card viz-card--wide">
       <span class="viz-kicker">B200</span>
@@ -51,7 +51,7 @@ The important part is not H200 versus B200 as hardware. A B200 setup with `DP=1`
         <span class="viz-rank is-hot">rep 2</span>
         <span class="viz-rank">rep 3</span>
       </div>
-      <small>four cache domains</small>
+      <small>four domains</small>
     </div>
   </div>
 </figure>
@@ -74,7 +74,6 @@ curl http://localhost:30000/v1/chat/completions \
     "messages": [
       {"role": "user", "content": "Continue this debugging session."}
     ],
-    "temperature": 0,
     "routed_dp_rank": 0
   }'
 ```
@@ -86,7 +85,7 @@ The goal is simple: same prefix, same cache owner. If a conversation warms DP re
   <div class="viz-route__flow" aria-hidden="true">
     <div class="viz-node">
       <span class="viz-kicker">request</span>
-      <strong>tenant + session</strong>
+      <strong>session</strong>
       <small>stable key</small>
     </div>
     <div class="viz-link"><span class="viz-packet"></span></div>
@@ -98,7 +97,7 @@ The goal is simple: same prefix, same cache owner. If a conversation warms DP re
     <div class="viz-link"><span class="viz-packet viz-packet--late"></span></div>
     <div class="viz-node viz-node--gpu">
       <span class="viz-kicker">gpu node</span>
-      <strong>DP replica 2</strong>
+      <strong>replica 2</strong>
       <small>KV owner</small>
     </div>
   </div>
@@ -127,24 +126,24 @@ I did not deploy SMG for this experiment, but it is the cleaner production shape
   <div class="viz-smg__board" aria-hidden="true">
     <div class="viz-smg__request">
       <span class="viz-kicker">incoming</span>
-      <strong>shared prefix</strong>
-      <small>tenant + session</small>
+      <strong>prefix</strong>
+      <small>session</small>
     </div>
     <div class="viz-router-core">
-      <span class="viz-kicker">SGLang Model Gateway</span>
+      <span class="viz-kicker">SMG</span>
       <strong>cache_aware</strong>
-      <small>prefix locality + load + health</small>
+      <small>prefix + load</small>
     </div>
     <div class="viz-smg__signals">
       <span class="viz-stat">prefix tree</span>
-      <span class="viz-stat">queue depth</span>
-      <span class="viz-stat">health checks</span>
+    <span class="viz-stat">queue</span>
+    <span class="viz-stat">health</span>
       <span class="viz-stat">fallback</span>
     </div>
     <div class="viz-smg__workers">
       <div class="viz-worker">
         <span>worker 0</span>
-        <small>cold prefix</small>
+        <small>cold</small>
       </div>
       <div class="viz-worker is-selected">
         <span>worker 1</span>
@@ -172,19 +171,19 @@ The broader pattern I learned is that serious LLM serving needs a KV hierarchy:
     <div class="viz-tier viz-tier--l1">
       <span class="viz-kicker">L1</span>
       <strong>GPU KV</strong>
-      <small>fastest, smallest</small>
+      <small>fast</small>
     </div>
     <div class="viz-cache__arrow">then</div>
     <div class="viz-tier viz-tier--l2">
       <span class="viz-kicker">L2</span>
-      <strong>Host memory</strong>
-      <small>larger local tier</small>
+      <strong>Host RAM</strong>
+      <small>larger</small>
     </div>
     <div class="viz-cache__arrow">then</div>
     <div class="viz-tier viz-tier--l3">
       <span class="viz-kicker">L3</span>
       <strong>Shared KV</strong>
-      <small>worker or node reuse</small>
+      <small>shared</small>
     </div>
   </div>
 </figure>
@@ -207,20 +206,20 @@ Separating them lets you scale each side independently: more prefill capacity wh
   <figcaption>Prefill and decode want different scaling knobs.</figcaption>
   <div class="viz-split__flow" aria-hidden="true">
     <div class="viz-step">
-      <span class="viz-kicker">long context</span>
-      <strong>prompt tokens</strong>
+      <span class="viz-kicker">context</span>
+      <strong>prompt</strong>
       <div class="viz-token-bar"><span></span><span></span><span></span><span></span></div>
     </div>
     <div class="viz-link"><span class="viz-packet"></span></div>
     <div class="viz-pool viz-pool--prefill">
-      <span class="viz-kicker">prefill pool</span>
-      <strong>compute-heavy</strong>
+      <span class="viz-kicker">prefill</span>
+      <strong>compute</strong>
       <small>build KV</small>
     </div>
     <div class="viz-link"><span class="viz-packet viz-packet--late"></span></div>
     <div class="viz-pool viz-pool--decode">
-      <span class="viz-kicker">decode pool</span>
-      <strong>latency-sensitive</strong>
+      <span class="viz-kicker">decode</span>
+      <strong>latency</strong>
       <small>stream tokens</small>
     </div>
   </div>
