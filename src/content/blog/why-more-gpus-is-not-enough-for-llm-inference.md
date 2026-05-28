@@ -72,8 +72,7 @@ curl http://localhost:30000/v1/chat/completions \
   -d '{
     "model": "deepseek-v4-flash",
     "messages": [
-      {"role": "system", "content": "You are a coding agent. Follow the repository policies and answer concisely."},
-      {"role": "user", "content": "Continue the same debugging session and explain the next step."}
+      {"role": "user", "content": "Continue this debugging session."}
     ],
     "temperature": 0,
     "routed_dp_rank": 0
