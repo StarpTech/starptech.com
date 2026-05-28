@@ -378,7 +378,7 @@ article p {
 }
 
 /* prose links — visible, consistent accent underline */
-article a:not(.writing-list__link) {
+article a:not(.writing-list__link):not(.now) {
   position: relative;
   display: inline;
   color: var(--text);
@@ -391,13 +391,13 @@ article a:not(.writing-list__link) {
     color 0.18s ease;
 }
 
-article a:not(.writing-list__link):hover,
-article a:not(.writing-list__link):focus-visible {
+article a:not(.writing-list__link):not(.now):hover,
+article a:not(.writing-list__link):not(.now):focus-visible {
   color: var(--accent);
   text-decoration-color: var(--accent);
 }
 
-article a:not(.writing-list__link):focus-visible {
+article a:not(.writing-list__link):not(.now):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: 2px;
