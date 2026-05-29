@@ -31,13 +31,13 @@ const readingMinutes = Math.max(1, Math.round(wordCount / 220));
 const mdHref = `/blog/${post.slug}.md`;
 const site = Astro.site ?? new URL(Astro.url.origin);
 const postUrl = new URL(`/blog/${post.slug}/`, site).toString();
-const shareText = `${post.data.title} — Dustin Deus`;
+const shareText = post.data.title;
 const xShareHref = `https://x.com/intent/tweet?url=${encodeURIComponent(postUrl)}&text=${encodeURIComponent(shareText)}`;
 const linkedInShareHref = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`;
 ---
 
 <Layout
-  pageTitle={`${post.data.title} — Dustin Deus`}
+  pageTitle={post.data.title}
   description={post.data.description}
   ogType="article"
   schemaType="BlogPosting"
