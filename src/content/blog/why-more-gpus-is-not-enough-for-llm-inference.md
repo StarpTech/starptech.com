@@ -1,6 +1,7 @@
 ---
 title: "Why more GPUs is not enough for LLM inference"
 description: "What I learned deploying and tuning large-model inference: KV cache, routing, and cache hierarchy matter as much as raw GPU count."
+category: "AI infrastructure"
 date: 2026-05-28
 draft: false
 ---

@@ -1,6 +1,7 @@
 ---
 title: "The case for a schema registry"
 description: "Schemas are documentation, but they're also infrastructure. Here's why putting them in one place changes how teams build APIs."
+category: "API infrastructure"
 date: 2026-04-12
 draft: true
 ---

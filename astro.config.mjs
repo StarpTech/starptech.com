@@ -8,6 +8,12 @@ export default defineConfig({
     prefetch: { defaultStrategy: 'viewport' },
     integrations: [sitemap()],
     build: { inlineStylesheets: 'auto' },
+    vite: {
+        // @resvg/resvg-js ships a native .node binding that Vite/esbuild
+        // can't bundle — keep it external so it's required at runtime.
+        ssr: { external: ['@resvg/resvg-js'] },
+        optimizeDeps: { exclude: ['@resvg/resvg-js'] },
+    },
     markdown: {
         shikiConfig: {
             themes: { light: 'github-light', dark: 'github-dark' },

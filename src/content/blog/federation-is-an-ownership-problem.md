@@ -1,6 +1,7 @@
 ---
 title: "Federation isn't a graph problem, it's an ownership problem"
 description: "After three years building a federation platform, the hardest parts have nothing to do with the graph."
+category: "Platform architecture"
 date: 2026-03-04
 draft: true
 ---

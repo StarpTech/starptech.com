@@ -208,11 +208,7 @@ if (canvas) {
     { passive: true },
   );
   window.addEventListener("resize", resize, { passive: true });
-  if ("addEventListener" in reducedMotion) {
-    reducedMotion.addEventListener("change", restart);
-  } else {
-    reducedMotion.addListener(restart);
-  }
+  reducedMotion.addEventListener("change", restart);
 
   new MutationObserver(syncTheme).observe(root, {
     attributes: true,

@@ -8,6 +8,7 @@ interface Props {
   description?: string;
   robots?: string;
   signalField?: boolean;
+  ogImage?: string;
 }
 
 const {
@@ -15,11 +16,29 @@ const {
   description = "Dustin Deus — founder and engineer. Former co-founder & CTO at WunderGraph. Now Principal Engineer at OpenCode.",
   robots = "index, follow",
   signalField = false,
+  ogImage: ogImageProp,
 } = Astro.props;
 
 const site = Astro.site ?? new URL(Astro.url.origin);
 const canonical = new URL(Astro.url.pathname, site).toString();
-const ogImage = new URL("/builder-background.webp", site).toString();
+
+/** Per-page social preview image, generated at build time by /og/*.png.
+ *  - `/`              → `/og/index.png`
+ *  - `/blog`          → `/og/blog.png`
+ *  - `/blog/<slug>`   → `/og/blog/<slug>.png`
+ *  - anything else    → static fallback
+ */
+function ogImagePath(pathname: string): string {
+  const clean = pathname.replace(/\/$/, "");
+  if (clean === "") return "/og/index.png";
+  if (clean === "/blog") return "/og/blog.png";
+  if (clean.startsWith("/blog/")) return `/og${clean}.png`;
+  return "/builder-background.webp";
+}
+const ogImage = new URL(
+  ogImageProp ?? ogImagePath(Astro.url.pathname),
+  site,
+).toString();
 
 /** Markdown counterpart of the current page, for LLM ingestion.
  *  - `/`              → `/index.md`
@@ -117,8 +136,8 @@ const structuredData = {
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
-    <meta property="og:image:width" content="1664" />
-    <meta property="og:image:height" content="936" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="profile:first_name" content="Dustin" />
     <meta property="profile:last_name" content="Deus" />
     <meta property="profile:username" content="StarpTech" />
@@ -141,7 +160,7 @@ const structuredData = {
       } catch {}
     </script>
 
-    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
   </head>
   <body>
     {signalField && (
