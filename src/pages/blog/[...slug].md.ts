@@ -18,6 +18,7 @@ export const GET: APIRoute = async ({ props, site }) => {
   const md = `---
 title: ${JSON.stringify(post.data.title)}
 description: ${JSON.stringify(post.data.description)}
+category: ${JSON.stringify(post.data.category)}
 date: ${date}
 canonical: ${canonical}
 ---
@@ -30,6 +31,9 @@ ${post.body.trim()}
 `;
 
   return new Response(md, {
-    headers: { "Content-Type": "text/markdown; charset=utf-8" },
+    headers: {
+      "Content-Type": "text/markdown; charset=utf-8",
+      "X-Robots-Tag": "noindex, follow",
+    },
   });
 };

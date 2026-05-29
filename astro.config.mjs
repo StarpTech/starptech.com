@@ -6,7 +6,14 @@ export default defineConfig({
     site: 'https://starptech.com',
     compressHTML: true,
     prefetch: { defaultStrategy: 'viewport' },
-    integrations: [sitemap()],
+    integrations: [sitemap({
+        filter: (page) =>
+            !page.endsWith('.md') &&
+            !page.endsWith('.txt') &&
+            !page.endsWith('.png') &&
+            !page.endsWith('/rss.xml') &&
+            !page.includes('/404'),
+    })],
     build: { inlineStylesheets: 'auto' },
     vite: {
         // @resvg/resvg-js ships a native .node binding that Vite/esbuild

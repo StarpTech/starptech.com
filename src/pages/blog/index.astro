@@ -18,6 +18,9 @@ const fmt = (d: Date) =>
 <Layout
   pageTitle="Writing — Dustin Deus"
   description="Notes on infrastructure, shipping software, and startups."
+  ogType="website"
+  schemaType="CollectionPage"
+  headline="Writing"
 >
   <main class="page" id="content">
     <Masthead active="writing" />
@@ -42,6 +45,7 @@ const fmt = (d: Date) =>
                     {fmt(post.data.date)}
                   </time>
                   <div class="writing-list__copy">
+                    <p class="writing-list__category">{post.data.category}</p>
                     <h2 class="writing-list__title">{post.data.title}</h2>
                     <p class="writing-list__description">{post.data.description}</p>
                   </div>

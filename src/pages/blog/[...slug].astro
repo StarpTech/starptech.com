@@ -39,6 +39,13 @@ const linkedInShareHref = `https://www.linkedin.com/sharing/share-offsite/?url=$
 <Layout
   pageTitle={`${post.data.title} — Dustin Deus`}
   description={post.data.description}
+  ogType="article"
+  schemaType="BlogPosting"
+  headline={post.data.title}
+  publishedTime={post.data.date.toISOString()}
+  section={post.data.category}
+  tags={[post.data.category]}
+  ogImageAlt={`Social preview for ${post.data.title}`}
 >
   <main class="page" id="content">
     <Masthead active="writing" />
@@ -75,6 +82,8 @@ const linkedInShareHref = `https://www.linkedin.com/sharing/share-offsite/?url=$
 
       <header class="post__header">
         <p class="post__meta">
+          <span>{post.data.category}</span>
+          <span class="post__meta-sep" aria-hidden="true">·</span>
           <time datetime={post.data.date.toISOString()}>{fmt(post.data.date)}</time>
           <span class="post__meta-sep" aria-hidden="true">·</span>
           <span>{readingMinutes} min read</span>
