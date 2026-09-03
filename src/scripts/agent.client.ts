@@ -33,7 +33,7 @@ function toggleTheme() {
 function consoleSignature() {
   // pull live theme colors so the message matches dark/light
   const root = getComputedStyle(document.documentElement);
-  const accent = root.getPropertyValue("--accent").trim() || "#2563eb";
+  const accent = root.getPropertyValue("--accent").trim() || "#655bd7";
   const muted = root.getPropertyValue("--muted").trim() || "#737373";
   const mono =
     "'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";

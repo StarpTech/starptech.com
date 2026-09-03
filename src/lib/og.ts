@@ -34,10 +34,10 @@ const iconSvg = readFileSync(
 const iconDataUri = `data:image/svg+xml;base64,${Buffer.from(iconSvg).toString("base64")}`;
 
 // Brand tokens, mirrored from src/styles/global.css (dark theme).
-const BG = "#0a0a0a";
-const TEXT = "#fafafa";
-const MUTED = "#a3a3a3";
-const GRADIENT = ["#60a5fa", "#a78bfa", "#f472b6", "#fbbf24"];
+const BG = "#0b0d12";
+const TEXT = "#f1f0eb";
+const MUTED = "#a6a9b2";
+const GRADIENT = ["#8b9cf6", "#bd8ef0", "#ef88b4", "#8b9cf6"];
 
 export interface OgOptions {
   /** Headline shown large on the card. */

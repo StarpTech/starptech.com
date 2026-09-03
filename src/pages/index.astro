@@ -1,115 +1,71 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Masthead from "../components/Masthead.astro";
-import { getCollection } from "astro:content";
 
-const pageTitle = "Dustin Deus";
+const pageTitle = "Dustin Deus — Founder & Founding Engineer";
 const pageDescription =
-    "Dustin Deus — founder and engineer. Former co-founder & CTO at WunderGraph. Now Principal Engineer at OpenCode, building open-source AI developer tools.";
-
-const posts = (await getCollection("blog"))
-    .filter((p) => !p.data.draft)
-    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-const latest = posts[0];
-
-const fmt = (d: Date) =>
-    d.toLocaleDateString("en", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-    });
+    "Dustin Deus — founder and engineer. Former co-founder & CTO at WunderGraph. Now Founding Engineer at Leverage Computer, building the company computer.";
 ---
 
 <Layout pageTitle={pageTitle} description={pageDescription} signalField>
-    <main class="page" id="content">
+    <main class="page page--home" id="content">
         <Masthead active="home" />
 
-        <article>
-            <a
-                class="now"
-                href="https://opencode.ai/"
-                target="_blank"
-                rel="noreferrer"
-            >
-                <span class="now__dot" aria-hidden="true"></span>
-                <span>building at OpenCode</span>
-            </a>
+        <article class="home">
+            <h1 class="home-hero">
+                I build from <span class="home-hero__highlight">zero.</span>
+                <span class="home-hero__accent">
+                    Companies, teams, and the systems underneath.
+                </span>
+            </h1>
 
-            <p class="lede">
-                Fifteen years of shipping. Still finding new ways to be wrong.
-            </p>
-
-            <p>
-                I co-founded
-                <a
-                    href="https://wundergraph.com"
-                    target="_blank"
-                    rel="noreferrer">WunderGraph</a
-                >
-                and helped build it from an idea into a real company. We raised our
-                Seed round, failed with the first product, built Cosmo in four weeks,
-                survived, raised our Series A, and found our way to a platform used
-                by teams at eBay, SoundCloud, Paramount, and others to integrate,
-                collaborate on, and operate APIs at scale, today driving tens of billions
-                of requests.
-            </p>
-
-            <p>
-                As a first-time founder, that journey changed how I build. I
-                hired every engineer myself and helped shape a culture around
-                ego-less collaboration, openness, ownership, and high standards.
-                Building something from scratch that supports dozens of people
-                and their families is hard to describe. It stays with you.
-            </p>
-
-            <p>
-                Now I'm a Principal Engineer at
-                <a href="https://opencode.ai/" target="_blank" rel="noreferrer"
-                    >OpenCode</a
-                >. AI is changing how software gets written, shipped, and
-                maintained. I want developers to keep control: choose their
-                models, own their stack, protect their data, and optimize costs
-                without getting locked into closed ecosystems.
-            </p>
-
-            <p class="contact">
-                Want to talk infrastructure, startups, or what's next for
-                developer tools — <a
-                    href="https://github.com/StarpTech"
-                    target="_blank"
-                    rel="noreferrer">github</a
-                >,
-                <a
-                    href="https://www.linkedin.com/in/dustin-deus/"
-                    target="_blank"
-                    rel="noreferrer">linkedin</a
-                >, or <a href="mailto:deusdustin@gmail.com">email</a>.
-            </p>
-
-            {
-                latest && (
-                    <section
-                        class="home-writing"
-                        aria-labelledby="home-writing-title"
+            <section class="home-story" aria-label="My story">
+                <p>
+                    I co-founded
+                    <a
+                        href="https://wundergraph.com"
+                        target="_blank"
+                        rel="noreferrer">WunderGraph</a
                     >
-                        <h2 class="home-writing__title" id="home-writing-title">
-                            Writing
-                        </h2>
-                        <p class="latest">
-                            Latest:
-                            <a href={`/blog/${latest.slug}/`}>
-                                {latest.data.title}
-                            </a>
-                            <span class="latest__sep" aria-hidden="true">
-                                ·
-                            </span>
-                            <time datetime={latest.data.date.toISOString()}>
-                                {fmt(latest.data.date)}
-                            </time>
-                        </p>
-                    </section>
-                )
-            }
+                    and helped turn it from an idea into a real company. The first
+                    product failed. We built Cosmo in four weeks, raised Seed and
+                    Series A, and today it helps teams at eBay, SoundCloud,
+                    Paramount, and others handle tens of billions of API requests.
+                </p>
+
+                <p>
+                    I hired every engineer and helped shape a culture around
+                    ego-less collaboration, openness, ownership, and high
+                    standards. Building something that supports dozens of people
+                    and their families changes you. That experience still shapes
+                    how I build.
+                </p>
+            </section>
+
+            <section class="focus-card" aria-labelledby="focus-title">
+                <div class="focus-card__eyebrow">
+                    <span>Now · Leverage Computer</span>
+                </div>
+                <h2 class="focus-card__title" id="focus-title">
+                    Building the company computer.
+                </h2>
+                <p>
+                    After a short chapter running the inference stack at
+                    <a
+                        href="https://opencode.ai/"
+                        target="_blank"
+                        rel="noreferrer">OpenCode</a
+                    >, I joined Leverage Computer as its first Founding Engineer.
+                    I’m helping build the company, team, and an AI-native system
+                    that connects a company’s people, knowledge, and work from the ground up.
+                </p>
+                <a
+                    class="focus-card__link"
+                    href="https://leverage.computer/"
+                    target="_blank"
+                    rel="noreferrer">Explore Leverage Computer <span aria-hidden="true">↗</span></a
+                >
+            </section>
         </article>
     </main>
 </Layout>

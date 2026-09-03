@@ -8,6 +8,7 @@ interface Props {
   description?: string;
   robots?: string;
   signalField?: boolean;
+  spotlight?: boolean;
   ogImage?: string;
   ogImageAlt?: string;
   ogType?: "website" | "profile" | "article";
@@ -21,9 +22,10 @@ interface Props {
 
 const {
   pageTitle = "Dustin Deus",
-  description = "Dustin Deus — founder and engineer. Former co-founder & CTO at WunderGraph. Now Principal Engineer at OpenCode.",
-  robots = "index, follow",
+  description = "Dustin Deus — founder and engineer. Former co-founder & CTO at WunderGraph. Now Founding Engineer at Leverage Computer.",
+  robots = "index, follow, max-image-preview:large",
   signalField = false,
+  spotlight = true,
   ogImage: ogImageProp,
   ogImageAlt,
   ogType = "profile",
@@ -40,6 +42,8 @@ const canonical = new URL(Astro.url.pathname, site).toString();
 const siteRoot = new URL("/", site).toString();
 const personId = new URL("/#person", site).toString();
 const websiteId = new URL("/#website", site).toString();
+const leverageId = new URL("/#organization-leverage", site).toString();
+const wunderGraphId = new URL("/#organization-wundergraph", site).toString();
 const webPageId = `${canonical}#webpage`;
 
 /** Per-page social preview image, generated at build time by /og/*.png.
@@ -59,6 +63,7 @@ const ogImage = new URL(
   ogImageProp ?? ogImagePath(Astro.url.pathname),
   site,
 ).toString();
+const ogImageType = ogImage.endsWith(".webp") ? "image/webp" : "image/png";
 const imageAlt = ogImageAlt ?? `Social preview for ${pageTitle}`;
 
 /** Markdown counterpart of the current page, for LLM ingestion.
@@ -89,23 +94,39 @@ const personSchema = {
   givenName: "Dustin",
   familyName: "Deus",
   alternateName: "StarpTech",
-  jobTitle: "Principal Engineer",
+  jobTitle: "Founding Engineer",
   description:
-    "Founder and engineer. Former co-founder & CTO at WunderGraph. Principal Engineer at OpenCode.",
+    "Founder and engineer. Former co-founder & CTO at WunderGraph. Founding Engineer at Leverage Computer.",
   email: "mailto:deusdustin@gmail.com",
   image: new URL("/icon.svg", site).toString(),
-  worksFor: {
-    "@type": "Organization",
-    name: "OpenCode",
-    url: "https://opencode.ai/",
-  },
+  worksFor: { "@id": leverageId },
   url: siteRoot,
   sameAs: [
     "https://github.com/StarpTech",
     "https://www.linkedin.com/in/dustin-deus/",
-    "https://opencode.ai/",
-    "https://wundergraph.com",
   ],
+  knowsAbout: [
+    "AI infrastructure",
+    "API platforms",
+    "GraphQL federation",
+    "engineering leadership",
+    "company building",
+  ],
+};
+
+const leverageSchema = {
+  "@type": "Organization",
+  "@id": leverageId,
+  name: "Leverage Computer",
+  url: "https://leverage.computer/",
+};
+
+const wunderGraphSchema = {
+  "@type": "Organization",
+  "@id": wunderGraphId,
+  name: "WunderGraph",
+  url: "https://wundergraph.com/",
+  founder: { "@id": personId },
 };
 
 const websiteSchema = {
@@ -144,7 +165,13 @@ const pageSchema = {
 
 const structuredData = {
   "@context": "https://schema.org",
-  "@graph": [personSchema, websiteSchema, pageSchema],
+  "@graph": [
+    personSchema,
+    leverageSchema,
+    wunderGraphSchema,
+    websiteSchema,
+    pageSchema,
+  ],
 };
 ---
 
@@ -158,15 +185,15 @@ const structuredData = {
     <meta name="description" content={description} />
     <meta name="author" content="Dustin Deus" />
     <meta name="robots" content={robots} />
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f8f7f4" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b0d12" media="(prefers-color-scheme: dark)" />
     <meta name="generator" content={Astro.generator} />
 
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icon.svg" />
-    <link rel="mask-icon" href="/icon-mask.svg" color="#2563eb" />
-    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="mask-icon" href="/icon-mask.svg" color="#655bd7" />
+    <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
     <link rel="alternate" type="application/rss+xml" href="/rss.xml" title="Dustin Deus — Writing" />
     {mdUrl && (
       <link rel="alternate" type="text/markdown" href={mdUrl} title="Markdown" />
@@ -203,6 +230,8 @@ const structuredData = {
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
+    <meta property="og:image:secure_url" content={ogImage} />
+    <meta property="og:image:type" content={ogImageType} />
     <meta property="og:image:alt" content={imageAlt} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -237,7 +266,7 @@ const structuredData = {
 
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
   </head>
-  <body>
+  <body class:list={{ "has-spotlight": spotlight }}>
     {signalField && (
       <div class="signal-field" aria-hidden="true">
         <canvas id="signalField"></canvas>

@@ -25,14 +25,14 @@ if (canvas) {
   const pointer = new THREE.Vector2(0, 0);
   const pointerTarget = new THREE.Vector2(0, 0);
   const wire = new THREE.MeshBasicMaterial({
-    color: new THREE.Color("#d4d4d4"),
+    color: new THREE.Color("#bfc2cb"),
     transparent: true,
     opacity: 0.13,
     wireframe: true,
     depthWrite: false,
   });
   const accentA = new THREE.MeshBasicMaterial({
-    color: new THREE.Color("#2563eb"),
+    color: new THREE.Color("#655bd7"),
     transparent: true,
     opacity: 0.34,
     depthWrite: false,
@@ -91,10 +91,10 @@ if (canvas) {
   function syncTheme() {
     const dark = root.dataset.theme === "dark";
 
-    wire.color.set(cssColor("--line-strong", dark ? "#404040" : "#d4d4d4"));
+    wire.color.set(cssColor("--line-strong", dark ? "#373e4e" : "#bfc2cb"));
     wire.opacity = dark ? 0.18 : 0.2;
-    accentA.color.set(cssColor("--grad-1", dark ? "#60a5fa" : "#2563eb"));
-    accentB.color.set(cssColor("--grad-3", dark ? "#f472b6" : "#ec4899"));
+    accentA.color.set(cssColor("--grad-1", dark ? "#8b9cf6" : "#655bd7"));
+    accentB.color.set(cssColor("--grad-3", dark ? "#ef88b4" : "#b04a78"));
     accentA.opacity = dark ? 0.42 : 0.32;
     accentB.opacity = dark ? 0.34 : 0.25;
 

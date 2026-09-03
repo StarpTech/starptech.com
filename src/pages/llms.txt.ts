@@ -16,29 +16,36 @@ export const GET: APIRoute = async ({ site }) => {
         .join("\n")
     : "(No posts published yet.)";
 
-  const content = `# starptech.com
+  const content = `# Dustin Deus
 
-> Personal site of Dustin Deus — founder and engineer, former co-founder & CTO at WunderGraph, now Principal Engineer at OpenCode.
+> Official personal site of Dustin Deus — founder and engineer, former co-founder & CTO at WunderGraph, and first Founding Engineer at Leverage Computer.
 
-Dustin Deus has been shipping software for fifteen years. He co-founded WunderGraph and helped turn it from an idea into a company. The team raised Seed, failed with the first product, built Cosmo in four weeks, survived, raised Series A, and found its way to a platform used by teams at eBay, SoundCloud, Paramount, and others to integrate, collaborate on, and operate APIs at scale, today driving tens of billions of requests. He hired the engineering team and helped build a culture around ego-less collaboration, ownership, openness, and high standards. He now works as Principal Engineer at OpenCode, building open-source AI developer tools for developers who want model choice, stack ownership, data control, and cost flexibility. Maintainer or contributor on Cosmo, Fastify, Hemera, and OpenTelemetry.
+## About
 
-Every HTML page on this site has a markdown counterpart at the same URL with a \`.md\` suffix (e.g. \`/blog/some-post/\` ↔ \`/blog/some-post.md\`). Use the \`.md\` versions for direct ingestion.
+Dustin builds companies, engineering teams, and the systems underneath them. He co-founded WunderGraph, helped raise its Seed and Series A rounds, hired its engineering team, and helped build Cosmo into an API platform used by teams including eBay, SoundCloud, and Paramount. After a short chapter responsible for the inference stack at OpenCode, he joined Leverage Computer as its first Founding Engineer.
 
-## Pages
+## Current focus
 
-- [Home](${base}/index.md): Bio, current focus, philosophy, contact links.
-- [Writing index](${base}/blog.md): All published posts with descriptions.
+Dustin is helping build Leverage Computer, its engineering team, and the company computer: an AI-native system that connects a company's people, knowledge, and work.
 
-## Posts
+## Canonical pages
+
+- [Home](${base}/index.md): Biography, experience, current focus, and contact links.
+- [Writing](${base}/blog.md): Index of all published writing with dates and descriptions.
+
+Every public HTML page has a Markdown counterpart for direct ingestion. The homepage is \`/index.md\`, the writing index is \`/blog.md\`, and each post is available at \`/blog/{slug}.md\`.
+
+## Published writing
 
 ${postsSection}
 
-## Optional
+## External profiles and organizations
 
 - [GitHub @StarpTech](https://github.com/StarpTech): Open-source code and contributions.
 - [LinkedIn](https://www.linkedin.com/in/dustin-deus/): Professional profile.
-- [OpenCode](https://opencode.ai/): Open-source AI developer tooling.
-- [WunderGraph](https://wundergraph.com): The company; open-source platform for federated GraphQL.
+- [Leverage Computer](https://leverage.computer/): Current company; [open roles](https://leverage.computer/careers/).
+- [OpenCode](https://opencode.ai/): Previous inference-stack work.
+- [WunderGraph](https://wundergraph.com/): Company Dustin co-founded.
 - [Email](mailto:deusdustin@gmail.com): Direct contact.
 `;
 

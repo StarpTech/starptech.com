@@ -1,6 +1,6 @@
 /* TEAM */
     name:        Dustin Deus
-    role:        Co-founder & CTO, WunderGraph
+    role:        Founding Engineer, Leverage Computer
     contact:     deusdustin [at] gmail.com
     site:        https://starptech.com
     github:      @StarpTech

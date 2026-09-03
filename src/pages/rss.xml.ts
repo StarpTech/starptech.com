@@ -33,9 +33,9 @@ export const GET: APIRoute = async ({ site }) => {
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
   <title>Dustin Deus — Writing</title>
-  <link>${base}/blog</link>
+  <link>${base}/blog/</link>
   <atom:link href="${base}/rss.xml" rel="self" type="application/rss+xml" />
-  <description>Notes on infrastructure, shipping software, and startups.</description>
+  <description>Writing by Dustin Deus on AI infrastructure, APIs, engineering teams, and building companies.</description>
   <language>en</language>
   <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
 ${items}

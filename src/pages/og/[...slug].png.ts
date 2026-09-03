@@ -18,14 +18,14 @@ export const getStaticPaths: GetStaticPaths = async () => {
       params: { slug: "index" },
       props: {
         title: "Dustin Deus",
-        meta: "Engineer & founder",
+        meta: "Founding engineer · founder",
         brand: null,
       },
     },
     {
       params: { slug: "blog" },
       props: {
-        title: "Notes on infrastructure, shipping software, and startups.",
+        title: "Where systems meet reality.",
         meta: "writing",
       },
     },
