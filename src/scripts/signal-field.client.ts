@@ -32,7 +32,7 @@ if (canvas) {
     depthWrite: false,
   });
   const accentA = new THREE.MeshBasicMaterial({
-    color: new THREE.Color("#655bd7"),
+    color: new THREE.Color("#4f46e5"),
     transparent: true,
     opacity: 0.34,
     depthWrite: false,
@@ -93,8 +93,8 @@ if (canvas) {
 
     wire.color.set(cssColor("--line-strong", dark ? "#373e4e" : "#bfc2cb"));
     wire.opacity = dark ? 0.18 : 0.2;
-    accentA.color.set(cssColor("--grad-1", dark ? "#8b9cf6" : "#655bd7"));
-    accentB.color.set(cssColor("--grad-3", dark ? "#ef88b4" : "#b04a78"));
+    accentA.color.set(cssColor("--grad-1", dark ? "#93a4ff" : "#4f46e5"));
+    accentB.color.set(cssColor("--grad-3", dark ? "#67e8f9" : "#0e7490"));
     accentA.opacity = dark ? 0.42 : 0.32;
     accentB.opacity = dark ? 0.34 : 0.25;
 

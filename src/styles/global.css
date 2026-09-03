@@ -27,7 +27,7 @@
 }
 
 /* ----------------------------------------------------------------------------
- * tokens — warm ink, restrained electric indigo
+ * tokens — warm ink, signal indigo + cyan
  * ------------------------------------------------------------------------- */
 
 :root {
@@ -40,14 +40,14 @@
   --muted: #6b707c;
   --line: #dcdde3;
   --line-strong: #bfc2cb;
-  --accent: #655bd7;
-  --writing-accent: #b04a78;
-  --writing-accent-2: #655bd7;
+  --accent: #4f46e5;
+  --writing-accent: #0e7490;
+  --writing-accent-2: #4f46e5;
 
-  --grad-1: #655bd7;
-  --grad-2: #875ac7;
-  --grad-3: #b04a78;
-  --grad-4: #655bd7;
+  --grad-1: #4f46e5;
+  --grad-2: #3b70d6;
+  --grad-3: #0e7490;
+  --grad-4: #4f46e5;
 
   --sans:
     "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
@@ -67,14 +67,14 @@
   --muted: #6d7280;
   --line: #242935;
   --line-strong: #373e4e;
-  --accent: #8b9cf6;
-  --writing-accent: #ef88b4;
-  --writing-accent-2: #8b9cf6;
+  --accent: #93a4ff;
+  --writing-accent: #67e8f9;
+  --writing-accent-2: #93a4ff;
 
-  --grad-1: #8b9cf6;
-  --grad-2: #bd8ef0;
-  --grad-3: #ef88b4;
-  --grad-4: #8b9cf6;
+  --grad-1: #93a4ff;
+  --grad-2: #7bc5f7;
+  --grad-3: #67e8f9;
+  --grad-4: #93a4ff;
 }
 
 /* ----------------------------------------------------------------------------
@@ -320,19 +320,29 @@ article p {
 .home-hero__accent {
   display: block;
   margin-top: 0.14em;
-  color: var(--text-soft);
+  color: color-mix(
+    in srgb,
+    var(--text-soft) 88%,
+    var(--writing-accent-2)
+  );
 }
 
 .home-hero__highlight {
   background: linear-gradient(
     105deg,
-    var(--writing-accent-2),
-    var(--writing-accent)
+    var(--writing-accent-2) 8%,
+    var(--writing-accent) 92%
   );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: var(--accent);
+}
+
+:root[data-theme="dark"] .home-hero__highlight {
+  filter: drop-shadow(
+    0 0 0.45em color-mix(in srgb, var(--writing-accent-2) 14%, transparent)
+  );
 }
 
 @supports not (-webkit-background-clip: text) {
