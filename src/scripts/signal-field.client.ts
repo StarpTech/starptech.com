@@ -32,14 +32,14 @@ if (canvas) {
     depthWrite: false,
   });
   const accentA = new THREE.MeshBasicMaterial({
-    color: new THREE.Color("#4f46e5"),
+    color: new THREE.Color("#655bd7"),
     transparent: true,
     opacity: 0.34,
     depthWrite: false,
   });
   const accentB = accentA.clone();
   const plane = new THREE.Mesh(geometry, wire);
-  const traceHeadGeometry = new THREE.SphereGeometry(smallViewport ? 0.014 : 0.018, 14, 7);
+  const traceHeadGeometry = new THREE.SphereGeometry(smallViewport ? 0.026 : 0.034, 14, 7);
   const trailPointCount = 24;
   const agents = Array.from({ length: smallViewport ? 5 : 12 }, (_, index) => {
     const group = new THREE.Group();
@@ -92,9 +92,9 @@ if (canvas) {
     const dark = root.dataset.theme === "dark";
 
     wire.color.set(cssColor("--line-strong", dark ? "#373e4e" : "#bfc2cb"));
-    wire.opacity = dark ? 0.18 : 0.2;
-    accentA.color.set(cssColor("--grad-1", dark ? "#93a4ff" : "#4f46e5"));
-    accentB.color.set(cssColor("--grad-3", dark ? "#67e8f9" : "#0e7490"));
+    wire.opacity = dark ? 0.38 : 0.3;
+    accentA.color.set(cssColor("--signal-accent-1", dark ? "#8b9cf6" : "#655bd7"));
+    accentB.color.set(cssColor("--signal-accent-2", dark ? "#ef88b4" : "#b04a78"));
     accentA.opacity = dark ? 0.42 : 0.32;
     accentB.opacity = dark ? 0.34 : 0.25;
 
@@ -149,8 +149,8 @@ if (canvas) {
       const current = agentPosition(phase, agent.lane, agent.drift, time);
 
       agent.group.position.copy(current);
-      agent.material.opacity = (smallViewport ? 0.2 : 0.28) + Math.sin(time * 1.8 + agent.offset * 12) * 0.06;
-      agent.trailMaterial.opacity = (smallViewport ? 0.08 : 0.12) + Math.sin(time * 1.2 + agent.offset * 9) * 0.035;
+      agent.material.opacity = (smallViewport ? 0.52 : 0.58) + Math.sin(time * 1.8 + agent.offset * 12) * 0.08;
+      agent.trailMaterial.opacity = (smallViewport ? 0.22 : 0.28) + Math.sin(time * 1.2 + agent.offset * 9) * 0.05;
 
       for (let i = 0; i < trailPointCount; i += 1) {
         const branchShift = i > trailPointCount * 0.56 ? agent.branch * 0.015 * (i - trailPointCount * 0.56) : 0;

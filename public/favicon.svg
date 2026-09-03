@@ -1,15 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
   <defs>
     <linearGradient id="g" x1="22" y1="6" x2="10" y2="26" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#8b9cf6"/>
-      <stop offset="0.5" stop-color="#bd8ef0"/>
-      <stop offset="1" stop-color="#ef88b4"/>
+      <stop offset="0" stop-color="#c2c5ca"/>
+      <stop offset="0.5" stop-color="#9fa5ad"/>
+      <stop offset="1" stop-color="#73a8d8"/>
     </linearGradient>
   </defs>
   <style>
-    .bg { fill: #0b0d12; }
+    .bg { fill: #141516; }
     @media (prefers-color-scheme: light) {
-      .bg { fill: #f8f7f4; }
+      .bg { fill: #f7f7f5; }
     }
   </style>
   <rect class="bg" x="0" y="0" width="32" height="32" rx="7"/>

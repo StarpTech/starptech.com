@@ -27,27 +27,33 @@
 }
 
 /* ----------------------------------------------------------------------------
- * tokens — warm ink, signal indigo + cyan
+ * tokens — warm ink, monochrome metal, restrained system blue
  * ------------------------------------------------------------------------- */
 
 :root {
   color-scheme: light dark;
 
-  --bg: #f8f7f4;
-  --bg-1: #fffdfa;
-  --text: #17171a;
-  --text-soft: #4d5058;
-  --muted: #6b707c;
-  --line: #dcdde3;
-  --line-strong: #bfc2cb;
-  --accent: #4f46e5;
-  --writing-accent: #0e7490;
-  --writing-accent-2: #4f46e5;
+  --bg: #f7f7f5;
+  --bg-1: #fcfcfa;
+  --text: #18191a;
+  --text-soft: #505256;
+  --muted: #6f7277;
+  --line: #dededb;
+  --line-strong: #bfc1c4;
+  --accent: #2f6f9f;
+  --writing-accent: #2f6f9f;
+  --writing-accent-2: #6b7078;
+  --hero-highlight-1: #18191a;
+  --hero-highlight-2: #595d64;
 
-  --grad-1: #4f46e5;
-  --grad-2: #3b70d6;
-  --grad-3: #0e7490;
-  --grad-4: #4f46e5;
+  --grad-1: #6b7078;
+  --grad-2: #8b9098;
+  --grad-3: #2f6f9f;
+  --grad-4: #6b7078;
+
+  /* The ambient system keeps its original identity independently of the UI. */
+  --signal-accent-1: #655bd7;
+  --signal-accent-2: #b04a78;
 
   --sans:
     "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
@@ -60,21 +66,26 @@
 }
 
 :root[data-theme="dark"] {
-  --bg: #0b0d12;
-  --bg-1: #11141b;
-  --text: #f1f0eb;
-  --text-soft: #a6a9b2;
-  --muted: #6d7280;
-  --line: #242935;
-  --line-strong: #373e4e;
-  --accent: #93a4ff;
-  --writing-accent: #67e8f9;
-  --writing-accent-2: #93a4ff;
+  --bg: #141516;
+  --bg-1: #191a1b;
+  --text: #efefec;
+  --text-soft: #a4a5a7;
+  --muted: #737578;
+  --line: #292b2d;
+  --line-strong: #414448;
+  --accent: #73a8d8;
+  --writing-accent: #73a8d8;
+  --writing-accent-2: #c2c5ca;
+  --hero-highlight-1: #efefec;
+  --hero-highlight-2: #b4b7bd;
 
-  --grad-1: #93a4ff;
-  --grad-2: #7bc5f7;
-  --grad-3: #67e8f9;
-  --grad-4: #93a4ff;
+  --grad-1: #c2c5ca;
+  --grad-2: #9fa5ad;
+  --grad-3: #73a8d8;
+  --grad-4: #c2c5ca;
+
+  --signal-accent-1: #8b9cf6;
+  --signal-accent-2: #ef88b4;
 }
 
 /* ----------------------------------------------------------------------------
@@ -126,8 +137,8 @@ body.has-spotlight::before {
   clip-path: polygon(44% 0, 56% 0, 86% 100%, 14% 100%);
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--writing-accent-2) 9%, transparent) 0%,
-    color-mix(in srgb, var(--writing-accent) 4%, transparent) 54%,
+    color-mix(in srgb, var(--signal-accent-1) 9%, transparent) 0%,
+    color-mix(in srgb, var(--signal-accent-2) 4%, transparent) 54%,
     transparent 94%
   );
   filter: blur(30px);
@@ -146,8 +157,8 @@ body.has-spotlight::after {
   transform: translateX(-50%);
   background: radial-gradient(
     ellipse at 50% 50%,
-    color-mix(in srgb, var(--writing-accent-2) 12%, transparent),
-    color-mix(in srgb, var(--writing-accent) 5%, transparent) 40%,
+    color-mix(in srgb, var(--signal-accent-1) 12%, transparent),
+    color-mix(in srgb, var(--signal-accent-2) 5%, transparent) 40%,
     transparent 72%
   );
   filter: blur(18px);
@@ -320,29 +331,19 @@ article p {
 .home-hero__accent {
   display: block;
   margin-top: 0.14em;
-  color: color-mix(
-    in srgb,
-    var(--text-soft) 88%,
-    var(--writing-accent-2)
-  );
+  color: var(--text-soft);
 }
 
 .home-hero__highlight {
   background: linear-gradient(
     105deg,
-    var(--writing-accent-2) 8%,
-    var(--writing-accent) 92%
+    var(--hero-highlight-1),
+    var(--hero-highlight-2)
   );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: var(--accent);
-}
-
-:root[data-theme="dark"] .home-hero__highlight {
-  filter: drop-shadow(
-    0 0 0.45em color-mix(in srgb, var(--writing-accent-2) 14%, transparent)
-  );
 }
 
 @supports not (-webkit-background-clip: text) {
@@ -359,7 +360,7 @@ article p {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  opacity: 1;
+  opacity: 0.68;
 }
 
 .signal-field::after {
@@ -370,15 +371,15 @@ article p {
   background:
     radial-gradient(ellipse at 50% 38%, var(--bg) 0 19rem, color-mix(in srgb, var(--bg) 68%, transparent) 30rem, transparent 48rem),
     linear-gradient(90deg, transparent 0 7%, color-mix(in srgb, var(--bg) 74%, transparent) 32% 68%, transparent 93% 100%);
-  opacity: 0.94;
+  opacity: 0.34;
 }
 
 :root[data-theme="dark"] .signal-field::after {
-  opacity: 0.94;
+  opacity: 0.38;
 }
 
 :root:not([data-theme="dark"]) .signal-field::after {
-  opacity: 0.86;
+  opacity: 0.28;
 }
 
 .signal-field canvas {
@@ -391,12 +392,12 @@ article p {
 
 @media (max-width: 640px) {
   .signal-field {
-    opacity: 0.74;
+    opacity: 0.6;
   }
 
   .signal-field::after {
     background: var(--bg);
-    opacity: 0.68;
+    opacity: 0.24;
   }
 }
 
@@ -2347,7 +2348,8 @@ body:has(.page--writing) .colophon {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+  /* The renderer freezes the scene; preserve the normal visual weight. */
   .signal-field {
-    opacity: 0.38;
+    opacity: 0.68;
   }
 }
