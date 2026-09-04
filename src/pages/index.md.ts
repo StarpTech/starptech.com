@@ -8,7 +8,7 @@ const md = `# Dustin Deus
 
 I co-founded [WunderGraph](https://wundergraph.com). Our first product failed; four weeks later, we built Cosmo. We raised Seed and Series A, and today it handles tens of billions of API requests for teams including eBay, SoundCloud, and Paramount.
 
-I helped build the engineering team and a low-ego engineering culture of openness, ownership, and high standards. That experience changed how I think about leadership and still shapes how I build.
+I built the engineering team and a low-ego engineering culture of openness, ownership, and high standards. That experience changed how I think about leadership and still shapes how I build.
 
 ## Now
 

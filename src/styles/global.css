@@ -348,22 +348,25 @@ article p {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background:
-    radial-gradient(ellipse at 50% 38%, var(--bg) 0 21rem, color-mix(in srgb, var(--bg) 78%, transparent) 34rem, transparent 52rem),
-    linear-gradient(90deg, transparent 0 4%, color-mix(in srgb, var(--bg) 88%, transparent) 24% 76%, transparent 96% 100%);
-  opacity: 0.5;
+  background: linear-gradient(
+    90deg,
+    transparent 0 calc(50% - 27rem),
+    var(--bg) calc(50% - 23rem) calc(50% + 23rem),
+    transparent calc(50% + 27rem) 100%
+  );
+  opacity: 0.66;
 }
 
 :root[data-theme="dark"] .signal-field::after {
-  opacity: 0.58;
+  opacity: 0.66;
 }
 
 :root:not([data-theme="dark"]) .signal-field::after {
-  opacity: 0.48;
+  opacity: 0.58;
 }
 
 :root:not([data-theme="dark"]) .signal-field {
-  opacity: 0.32;
+  opacity: 1;
 }
 
 .signal-field canvas {
@@ -381,7 +384,15 @@ article p {
 
   .signal-field::after {
     background: var(--bg);
-    opacity: 0.24;
+    opacity: 0.56;
+  }
+
+  :root:not([data-theme="dark"]) .signal-field {
+    opacity: 1;
+  }
+
+  :root:not([data-theme="dark"]) .signal-field::after {
+    opacity: 0.62;
   }
 }
 

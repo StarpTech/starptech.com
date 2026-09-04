@@ -176,7 +176,7 @@ const structuredData = {
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -185,8 +185,7 @@ const structuredData = {
     <meta name="description" content={description} />
     <meta name="author" content="Dustin Deus" />
     <meta name="robots" content={robots} />
-    <meta name="theme-color" content="#f7f7f5" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#141516" media="(prefers-color-scheme: dark)" />
+    <meta id="themeColor" name="theme-color" content="#141516" />
     <meta name="generator" content={Astro.generator} />
 
     <link rel="canonical" href={canonical} />
@@ -255,13 +254,15 @@ const structuredData = {
     <script is:inline>
       try {
         const saved = localStorage.getItem("theme");
-        if (saved === "dark" || saved === "light") {
-          document.documentElement.dataset.theme = saved;
-        } else {
-          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-          if (prefersDark) document.documentElement.dataset.theme = "dark";
-        }
-      } catch {}
+        const theme = saved === "light" ? "light" : "dark";
+        document.documentElement.dataset.theme = theme;
+        document.getElementById("themeColor")?.setAttribute(
+          "content",
+          theme === "dark" ? "#141516" : "#f7f7f5",
+        );
+      } catch {
+        document.documentElement.dataset.theme = "dark";
+      }
     </script>
 
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />

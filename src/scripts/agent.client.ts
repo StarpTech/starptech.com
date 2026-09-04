@@ -14,11 +14,10 @@ function syncLabel() {
 }
 
 function setTheme(next: "dark" | "light") {
-  if (next === "light") {
-    delete document.documentElement.dataset.theme;
-  } else {
-    document.documentElement.dataset.theme = next;
-  }
+  document.documentElement.dataset.theme = next;
+  document
+    .getElementById("themeColor")
+    ?.setAttribute("content", next === "dark" ? "#141516" : "#f7f7f5");
   try {
     localStorage.setItem("theme", next);
   } catch {}

@@ -295,16 +295,19 @@ if (canvas) {
   function syncTheme() {
     const dark = root.dataset.theme === "dark";
 
+    blackHole.visible = dark;
     wire.color.set(cssColor("--line-strong", dark ? "#373e4e" : "#bfc2cb"));
-    wire.opacity = dark ? 0.22 : 0.11;
+    wire.opacity = dark ? 0.22 : 0.14;
     accentA.color.set(cssColor("--signal-accent-1", dark ? "#8b9cf6" : "#655bd7"));
     accentB.color.set(cssColor("--signal-accent-2", dark ? "#ef88b4" : "#b04a78"));
     accentA.opacity = dark ? 0.42 : 0.32;
     accentB.opacity = dark ? 0.34 : 0.25;
-    diskMaterial.uniforms.uOpacity.value = dark ? 0.78 : 0.34;
-    horizonMaterial.color.set(dark ? 0x000000 : 0x34373b);
-    horizonMaterial.opacity = dark ? 1 : 0.58;
-    (stars.material as Three.PointsMaterial).opacity = dark ? 0.34 : 0.12;
+    diskMaterial.uniforms.uOpacity.value = dark ? 0.78 : 0.32;
+    diskMaterial.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending;
+    diskMaterial.needsUpdate = true;
+    horizonMaterial.color.set(0x000000);
+    horizonMaterial.opacity = dark ? 1 : 0.94;
+    (stars.material as Three.PointsMaterial).opacity = dark ? 0.34 : 0.2;
     asteroidKeyLight.intensity = dark ? 1.65 : 1.15;
     asteroidFillLight.intensity = dark ? 0.72 : 1.05;
 
@@ -426,10 +429,10 @@ if (canvas) {
       );
       const pointOpacity = dark
         ? smallViewport ? 0.58 : 0.68
-        : smallViewport ? 0.42 : 0.5;
+        : smallViewport ? 0.48 : 0.6;
       const trailOpacity = dark
         ? smallViewport ? 0.13 : 0.16
-        : smallViewport ? 0.07 : 0.09;
+        : smallViewport ? 0.1 : 0.14;
       agent.material.opacity =
         pointOpacity + Math.sin(time * 1.8 + agent.offset * 12) * 0.045;
       agent.trailMaterial.opacity =
