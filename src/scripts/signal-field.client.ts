@@ -323,8 +323,15 @@ if (canvas) {
   }
 
   function resize() {
-    width = window.innerWidth;
-    height = window.innerHeight;
+    const nextWidth = window.innerWidth;
+    const nextHeight = window.innerHeight;
+
+    /* Mobile browser chrome changes innerHeight while scrolling. Rebuilding the
+       camera for that height-only change makes the fixed black hole drift. */
+    if (smallViewport && width > 1 && Math.abs(nextWidth - width) < 2) return;
+
+    width = nextWidth;
+    height = nextHeight;
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     const blackHoleScale = smallViewport ? 0.54 : Math.min(0.92, 0.72 + width / 7200);
@@ -517,6 +524,7 @@ if (canvas) {
   window.addEventListener(
     "pointermove",
     (event) => {
+      if (event.pointerType === "touch") return;
       pointerTarget.x = (event.clientX / width - 0.5) * 2;
       pointerTarget.y = (event.clientY / height - 0.5) * -2;
     },
