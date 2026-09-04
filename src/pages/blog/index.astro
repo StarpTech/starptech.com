@@ -26,28 +26,22 @@ const readingMinutes = (body: string) =>
   ogType="website"
   schemaType="CollectionPage"
   headline="Writing"
+  spotlight={false}
 >
   <main class="page page--writing" id="content">
     <Masthead active="writing" />
 
     <article class="writing-index">
       <header class="writing-index__header">
-        <div
-          class="writing-index__counter"
-          aria-label={`${posts.length} published ${posts.length === 1 ? "note" : "notes"}`}
-        >
-          <strong>{posts.length.toString().padStart(2, "0")}</strong>
-          <span>published<br />{posts.length === 1 ? "note" : "notes"}</span>
-        </div>
-        <div class="writing-index__heading">
-          <p class="writing-index__eyebrow">Writing</p>
-          <h1 class="writing-index__title">
-            Where systems meet reality.
-          </h1>
-          <p class="writing-index__intro">
-            Architecture, inference, APIs, and the uncomfortable parts of shipping them.
-          </p>
-        </div>
+        <p class="writing-index__eyebrow">
+          Writing · {posts.length.toString().padStart(2, "0")} published {posts.length === 1 ? "note" : "notes"}
+        </p>
+        <h1 class="writing-index__title">
+          Where systems meet reality.
+        </h1>
+        <p class="writing-index__intro">
+          Architecture, inference, APIs, and the uncomfortable parts of shipping them.
+        </p>
       </header>
 
       {

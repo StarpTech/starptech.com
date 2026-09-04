@@ -43,17 +43,18 @@
   --accent: #2f6f9f;
   --writing-accent: #2f6f9f;
   --writing-accent-2: #6b7078;
-  --hero-highlight-1: #18191a;
-  --hero-highlight-2: #595d64;
-
-  --grad-1: #6b7078;
-  --grad-2: #8b9098;
-  --grad-3: #2f6f9f;
-  --grad-4: #6b7078;
-
   /* The ambient system keeps its original identity independently of the UI. */
   --signal-accent-1: #655bd7;
   --signal-accent-2: #b04a78;
+
+  --type-display: clamp(2.35rem, 7vw, 4.25rem);
+  --type-title: clamp(1.55rem, 3.8vw, 2rem);
+  --type-body: 1.0625rem;
+  --type-ui: 0.74rem;
+  --tracking-display: -0.055em;
+  --transition-ui: 0.18s ease;
+  --focus-width: 2px;
+  --focus-offset: 3px;
 
   --sans:
     "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
@@ -76,14 +77,6 @@
   --accent: #73a8d8;
   --writing-accent: #73a8d8;
   --writing-accent-2: #c2c5ca;
-  --hero-highlight-1: #efefec;
-  --hero-highlight-2: #b4b7bd;
-
-  --grad-1: #c2c5ca;
-  --grad-2: #9fa5ad;
-  --grad-3: #73a8d8;
-  --grad-4: #c2c5ca;
-
   --signal-accent-1: #8b9cf6;
   --signal-accent-2: #ef88b4;
 }
@@ -178,6 +171,12 @@ body.has-spotlight::after {
   color: var(--bg);
 }
 
+:where(a, button):focus-visible {
+  outline: var(--focus-width) solid var(--accent);
+  outline-offset: var(--focus-offset);
+  border-radius: 2px;
+}
+
 /* ----------------------------------------------------------------------------
  * page shell — single column, generous whitespace
  * ------------------------------------------------------------------------- */
@@ -235,8 +234,8 @@ body.has-spotlight::after {
   text-decoration: none;
   font-weight: 400;
   transition:
-    color 0.15s ease,
-    text-decoration-color 0.15s ease;
+    color var(--transition-ui),
+    text-decoration-color var(--transition-ui);
 }
 
 /* not on this page → render as a clear link with a hairline underline */
@@ -251,8 +250,8 @@ body.has-spotlight::after {
 
 .masthead__name:not(.is-active):hover,
 .masthead__link:not(.is-active):hover {
-  color: var(--text);
-  text-decoration-color: var(--text);
+  color: var(--accent);
+  text-decoration-color: var(--accent);
 }
 
 /* current page → solid color, no underline */
@@ -299,7 +298,7 @@ article {
 article p {
   margin: 0 0 1.4em;
   font-family: var(--sans);
-  font-size: 1.0625rem;
+  font-size: var(--type-body);
   line-height: 1.65;
   color: var(--text);
   text-wrap: pretty;
@@ -320,10 +319,10 @@ article p {
   isolation: isolate;
   max-width: 14ch;
   margin: 0 0 clamp(36px, 6vh, 56px);
-  font-size: clamp(2.35rem, 7vw, 4.25rem);
+  font-size: var(--type-display);
   line-height: 0.98;
   font-weight: 600;
-  letter-spacing: -0.055em;
+  letter-spacing: var(--tracking-display);
   color: var(--text);
   text-wrap: balance;
 }
@@ -334,33 +333,14 @@ article p {
   color: var(--text-soft);
 }
 
-.home-hero__highlight {
-  background: linear-gradient(
-    105deg,
-    var(--hero-highlight-1),
-    var(--hero-highlight-2)
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: var(--accent);
-}
-
-@supports not (-webkit-background-clip: text) {
-  .home-hero__highlight {
-    color: var(--accent);
-    background: none;
-  }
-}
-
-/* Orbital system + black hole — quiet depth behind the writing. */
+/* Signal field + black hole — atmosphere around, quiet beneath the writing. */
 .signal-field {
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  opacity: 0.68;
+  opacity: 0.56;
 }
 
 .signal-field::after {
@@ -369,17 +349,21 @@ article p {
   inset: 0;
   z-index: 1;
   background:
-    radial-gradient(ellipse at 50% 38%, var(--bg) 0 19rem, color-mix(in srgb, var(--bg) 68%, transparent) 30rem, transparent 48rem),
-    linear-gradient(90deg, transparent 0 7%, color-mix(in srgb, var(--bg) 74%, transparent) 32% 68%, transparent 93% 100%);
-  opacity: 0.34;
+    radial-gradient(ellipse at 50% 38%, var(--bg) 0 21rem, color-mix(in srgb, var(--bg) 78%, transparent) 34rem, transparent 52rem),
+    linear-gradient(90deg, transparent 0 4%, color-mix(in srgb, var(--bg) 88%, transparent) 24% 76%, transparent 96% 100%);
+  opacity: 0.5;
 }
 
 :root[data-theme="dark"] .signal-field::after {
-  opacity: 0.38;
+  opacity: 0.58;
 }
 
 :root:not([data-theme="dark"]) .signal-field::after {
-  opacity: 0.28;
+  opacity: 0.48;
+}
+
+:root:not([data-theme="dark"]) .signal-field {
+  opacity: 0.32;
 }
 
 .signal-field canvas {
@@ -392,7 +376,7 @@ article p {
 
 @media (max-width: 640px) {
   .signal-field {
-    opacity: 0.6;
+    opacity: 0.48;
   }
 
   .signal-field::after {
@@ -402,28 +386,34 @@ article p {
 }
 
 /* prose links — visible, consistent accent underline */
-article a:not(.writing-list__link):not(.focus-card__link):not(.featured-note) {
+.home-story a,
+.focus-card p a,
+.not-found p a {
   position: relative;
   display: inline;
   color: var(--text);
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
-  text-decoration-color: var(--line-strong);
+  text-decoration-color: color-mix(in srgb, var(--accent) 42%, var(--line-strong));
   text-underline-offset: 0.2em;
   transition:
-    text-decoration-color 0.18s ease,
-    color 0.18s ease;
+    text-decoration-color var(--transition-ui),
+    color var(--transition-ui);
 }
 
-article a:not(.writing-list__link):not(.focus-card__link):not(.featured-note):hover,
-article a:not(.writing-list__link):not(.focus-card__link):not(.featured-note):focus-visible {
+.home-story a:hover,
+.home-story a:focus-visible,
+.focus-card p a:hover,
+.focus-card p a:focus-visible,
+.not-found p a:hover,
+.not-found p a:focus-visible {
   color: var(--accent);
   text-decoration-color: var(--accent);
 }
 
-article a:not(.writing-list__link):not(.focus-card__link):not(.featured-note):focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
+.home-story a:focus-visible,
+.focus-card p a:focus-visible,
+.not-found p a:focus-visible {
   border-radius: 2px;
 }
 
@@ -501,7 +491,7 @@ article b {
 .focus-card__title {
   max-width: 18ch;
   margin: 0 0 12px;
-  font-size: clamp(1.55rem, 3.8vw, 2rem);
+  font-size: var(--type-title);
   font-weight: 600;
   line-height: 1.12;
   letter-spacing: -0.032em;
@@ -523,11 +513,10 @@ article b {
   padding: 2px 0;
   color: var(--accent);
   font-family: var(--mono);
-  font-size: 0.72rem;
+  font-size: var(--type-ui);
   letter-spacing: 0.01em;
   text-decoration: none;
-  transition:
-    color 0.18s ease;
+  transition: color var(--transition-ui);
 }
 
 .focus-card__link:hover {
@@ -535,15 +524,15 @@ article b {
 }
 
 .focus-card__link:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
+  color: var(--text);
 }
 
 .focus-card__link span {
-  transition: transform 0.18s ease;
+  transition: transform var(--transition-ui);
 }
 
-.focus-card__link:hover span {
+.focus-card__link:hover span,
+.focus-card__link:focus-visible span {
   transform: translate(2px, -2px);
 }
 
@@ -571,67 +560,36 @@ article b {
 
 .writing-index__header {
   position: relative;
-  display: grid;
-  grid-template-columns: 8.25rem minmax(0, 1fr);
-  gap: clamp(24px, 5vw, 44px);
-  align-items: start;
-  margin: 0 0 clamp(36px, 6vh, 56px);
-  padding: 8px 0 clamp(20px, 3vh, 30px);
+  max-width: 40rem;
+  margin: 0 0 clamp(42px, 7vh, 64px);
 }
 
-.writing-index__counter {
-  display: grid;
-  gap: 12px;
-  padding-top: 5px;
-}
-
-.writing-index__counter strong {
-  width: fit-content;
-  font-size: clamp(3rem, 7vw, 4.5rem);
-  font-weight: 600;
-  line-height: 0.8;
-  letter-spacing: -0.08em;
-  color: transparent;
-  -webkit-text-stroke: 1px var(--writing-accent);
-}
-
-@supports not (-webkit-text-stroke: 1px black) {
-  .writing-index__counter strong {
-    color: var(--writing-accent);
-  }
-}
-
-.writing-index__counter span,
 .writing-index__eyebrow {
+  margin: 0 0 16px;
   font-family: var(--mono);
-  font-size: 0.67rem;
+  font-size: 0.7rem;
   line-height: 1.5;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.045em;
   text-transform: uppercase;
-  color: var(--muted);
-}
-
-.writing-index__eyebrow {
-  margin: 0 0 14px;
   color: var(--writing-accent);
 }
 
 .writing-index__title {
-  max-width: 14ch;
-  margin: 0 0 18px;
-  font-size: clamp(2.1rem, 4.6vw, 3rem);
-  line-height: 1.04;
+  max-width: 13ch;
+  margin: 0 0 20px;
+  font-size: var(--type-display);
+  line-height: 0.98;
   font-weight: 600;
-  letter-spacing: -0.045em;
+  letter-spacing: var(--tracking-display);
   color: var(--text);
   text-wrap: balance;
 }
 
 .writing-index__intro {
-  max-width: 43ch;
+  max-width: 39ch;
   margin: 0;
-  font-size: 1.04rem;
-  line-height: 1.55;
+  font-size: 1.08rem;
+  line-height: 1.62;
   color: var(--text-soft);
 }
 
@@ -642,44 +600,28 @@ article b {
 
 .featured-note {
   position: relative;
-  isolation: isolate;
   display: grid;
-  grid-template-columns: 8.25rem minmax(0, 1fr);
+  grid-template-columns: 7.5rem minmax(0, 1fr);
   column-gap: clamp(24px, 5vw, 44px);
-  overflow: hidden;
-  padding: clamp(30px, 5vw, 42px) clamp(20px, 4vw, 30px);
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  background:
-    linear-gradient(
-      90deg,
-      var(--bg-1) 0%,
-      color-mix(in srgb, var(--bg-1) 94%, transparent) 56%,
-      transparent 100%
-    ),
-    linear-gradient(
-      color-mix(in srgb, var(--writing-accent-2) 6%, transparent) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--writing-accent-2) 6%, transparent) 1px,
-      transparent 1px
-    ),
-    color-mix(in srgb, var(--writing-accent-2) 4%, var(--bg-1));
-  background-size: auto, 30px 30px, 30px 30px, auto;
+  padding: clamp(26px, 4vw, 32px) clamp(22px, 4vw, 30px);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--writing-accent-2) 7%, var(--bg)) 0%,
+    color-mix(in srgb, var(--bg) 88%, transparent) 58%,
+    transparent 100%
+  );
   color: var(--text);
   text-decoration: none;
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease;
+  transition: background var(--transition-ui);
 }
 
 .featured-note::before {
   content: "";
   position: absolute;
   inset: 0 auto 0 0;
-  width: 3px;
+  width: 2px;
   background: linear-gradient(
     180deg,
     var(--writing-accent),
@@ -687,28 +629,13 @@ article b {
   );
 }
 
-.featured-note::after {
-  content: "01";
-  position: absolute;
-  z-index: -1;
-  right: 18px;
-  bottom: -0.18em;
-  font-family: var(--sans);
-  font-size: 8rem;
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.08em;
-  color: color-mix(in srgb, var(--writing-accent) 6%, transparent);
-  pointer-events: none;
-}
-
 .featured-note:hover {
-  border-color: color-mix(in srgb, var(--writing-accent) 42%, var(--line-strong));
-}
-
-.featured-note:focus-visible {
-  outline: 2px solid var(--writing-accent);
-  outline-offset: 3px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--writing-accent-2) 10%, var(--bg)) 0%,
+    color-mix(in srgb, var(--writing-accent) 3%, var(--bg)) 62%,
+    transparent 100%
+  );
 }
 
 .featured-note__meta {
@@ -739,8 +666,8 @@ article b {
 .featured-note__title {
   grid-column: 2;
   max-width: 20ch;
-  margin: 0 0 14px;
-  font-size: clamp(1.55rem, 4vw, 2.15rem);
+  margin: 0 0 12px;
+  font-size: var(--type-title);
   font-weight: 600;
   line-height: 1.08;
   letter-spacing: -0.04em;
@@ -762,15 +689,29 @@ article b {
   align-items: center;
   gap: 8px;
   font-family: var(--mono);
-  font-size: 0.72rem;
+  font-size: var(--type-ui);
   color: var(--writing-accent);
 }
 
 .featured-note__read span {
-  transition: transform 0.18s ease;
+  transition: transform var(--transition-ui);
+}
+
+.featured-note__title,
+.featured-note__read {
+  transition: color var(--transition-ui);
+}
+
+.featured-note:hover .featured-note__title,
+.featured-note:focus-visible .featured-note__title {
+  color: var(--writing-accent);
 }
 
 .featured-note:hover .featured-note__read span {
+  transform: translate(2px, -2px);
+}
+
+.featured-note:focus-visible .featured-note__read span {
   transform: translate(2px, -2px);
 }
 
@@ -807,7 +748,7 @@ article b {
   padding: clamp(18px, 3vw, 26px) 0;
   text-decoration: none;
   color: var(--text);
-  transition: background 0.18s ease;
+  transition: background var(--transition-ui);
   min-height: 44px;
 }
 
@@ -815,7 +756,7 @@ article b {
   background: linear-gradient(
     90deg,
     transparent,
-    color-mix(in srgb, var(--accent) 6%, transparent),
+    color-mix(in srgb, var(--accent) 4%, transparent),
     transparent
   );
 }
@@ -849,31 +790,12 @@ article b {
   letter-spacing: -0.012em;
   line-height: 1.32;
   color: var(--text);
-  background-image:
-    linear-gradient(transparent, transparent),
-    linear-gradient(
-      90deg,
-      var(--grad-1),
-      var(--grad-2) 33%,
-      var(--grad-3) 66%,
-      var(--grad-4)
-    );
-  background-size:
-    100% 1px,
-    0% 2px;
-  background-position:
-    0 100%,
-    0 100%;
-  background-repeat: no-repeat;
-  padding-bottom: 2px;
-  transition: background-size 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: color var(--transition-ui);
 }
 
 .writing-list__link:hover .writing-list__title,
 .writing-list__link:focus-visible .writing-list__title {
-  background-size:
-    0% 1px,
-    100% 2px;
+  color: var(--accent);
 }
 
 .writing-list__description {
@@ -890,36 +812,23 @@ article b {
   font-size: 1rem;
   transition:
     transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
-    color 0.18s ease;
+    color var(--transition-ui);
   align-self: center;
 }
 
 .writing-list__link:hover .writing-list__arrow,
 .writing-list__link:focus-visible .writing-list__arrow {
   transform: translateX(4px);
-  color: var(--text);
+  color: var(--accent);
 }
 
 .writing-list__link:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 2px;
 }
 
 @media (max-width: 540px) {
   .writing-index__header {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-
-  .writing-index__counter {
-    display: flex;
-    align-items: flex-end;
-    gap: 14px;
-  }
-
-  .writing-index__counter strong {
-    font-size: 3rem;
+    margin-bottom: 40px;
   }
 
   .writing-index__title {
@@ -929,10 +838,6 @@ article b {
   .featured-note {
     grid-template-columns: 1fr;
     padding-inline: 16px;
-  }
-
-  .featured-note::after {
-    font-size: 5.5rem;
   }
 
   .featured-note__meta {
@@ -985,15 +890,16 @@ article b {
   gap: 6px;
   margin: 0;
   font-family: var(--mono);
-  font-size: 0.78rem;
+  font-size: var(--type-ui);
   letter-spacing: 0.01em;
   color: var(--muted);
   text-decoration: none;
-  transition: color 0.15s ease;
+  transition: color var(--transition-ui);
 }
 
-.post__back:hover {
-  color: var(--text);
+.post__back:hover,
+.post__back:focus-visible {
+  color: var(--accent);
 }
 
 /* "Copy as Markdown" — fetches the .md twin and writes it to the clipboard */
@@ -1007,23 +913,18 @@ article b {
   background: var(--bg-1);
   color: var(--text-soft);
   font-family: var(--mono);
-  font-size: 0.74rem;
+  font-size: var(--type-ui);
   letter-spacing: 0.01em;
   cursor: pointer;
   transition:
-    border-color 0.15s ease,
-    color 0.15s ease,
-    background 0.15s ease;
+    border-color var(--transition-ui),
+    color var(--transition-ui),
+    background var(--transition-ui);
 }
 
 .post__copy:hover {
-  border-color: var(--line-strong);
-  color: var(--text);
-}
-
-.post__copy:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong));
+  color: var(--accent);
 }
 
 .post__copy.is-copied {
@@ -1070,10 +971,10 @@ article b {
 
 .post__title {
   margin: 0 0 16px;
-  font-size: clamp(1.65rem, 5.6vw, 2.4rem);
+  font-size: clamp(2rem, 5.6vw, 3.25rem);
   font-weight: 600;
-  letter-spacing: -0.028em;
-  line-height: 1.18;
+  letter-spacing: -0.045em;
+  line-height: 1.06;
   color: var(--text);
   text-wrap: balance;
 }
@@ -1098,15 +999,31 @@ article b {
 }
 
 .post__back-bottom {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--mono);
-  font-size: 0.78rem;
+  font-size: var(--type-ui);
   color: var(--muted);
   text-decoration: none;
-  transition: color 0.15s ease;
+  transition: color var(--transition-ui);
 }
 
-.post__back-bottom:hover {
-  color: var(--text);
+.post__back-bottom:hover,
+.post__back-bottom:focus-visible {
+  color: var(--accent);
+}
+
+.post__back > span,
+.post__back-bottom > span {
+  transition: transform var(--transition-ui);
+}
+
+.post__back:hover > span,
+.post__back:focus-visible > span,
+.post__back-bottom:hover > span,
+.post__back-bottom:focus-visible > span {
+  transform: translateX(-2px);
 }
 
 .post__share {
@@ -1114,7 +1031,7 @@ article b {
   align-items: center;
   gap: 0.45rem;
   font-family: var(--mono);
-  font-size: 0.72rem;
+  font-size: var(--type-ui);
   line-height: 1;
   color: var(--muted);
 }
@@ -1134,21 +1051,16 @@ article b {
   text-decoration-color: var(--line-strong);
   text-underline-offset: 0.22em;
   transition:
-    text-decoration-color 0.16s ease,
-    color 0.16s ease,
-    background 0.16s ease;
+    text-decoration-color var(--transition-ui),
+    color var(--transition-ui),
+    background var(--transition-ui);
 }
 
 .post__share a:hover,
 .post__share a:focus-visible {
-  color: var(--text);
+  color: var(--accent);
   text-decoration-color: var(--accent);
   background: transparent;
-}
-
-.post__share a:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
 }
 
 @media (max-width: 540px) {
@@ -2143,17 +2055,12 @@ article b {
 }
 
 .theme-toggle:hover {
-  color: var(--text);
-  border-color: var(--line-strong);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong));
 }
 
 .theme-toggle:active {
   transform: scale(0.92);
-}
-
-.theme-toggle:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
 }
 
 .tt-icon {
@@ -2236,7 +2143,7 @@ article b {
 .colophon__destinations a {
   color: var(--muted);
   text-decoration: none;
-  transition: color 0.16s ease;
+  transition: color var(--transition-ui);
 }
 
 .colophon__social {
@@ -2268,11 +2175,14 @@ article b {
   color: var(--accent);
 }
 
-.colophon__social:focus-visible,
-.colophon__destinations a:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 3px;
+.colophon__destinations a span {
+  display: inline-block;
+  transition: transform var(--transition-ui);
+}
+
+.colophon__destinations a:hover span,
+.colophon__destinations a:focus-visible span {
+  transform: translate(2px, -2px);
 }
 
 body:has(.page--home) .colophon,
@@ -2283,13 +2193,12 @@ body:has(.page--writing) .colophon {
 .colophon__link {
   color: var(--muted);
   text-decoration: none;
-  transition:
-    color 0.15s ease;
+  transition: color var(--transition-ui);
 }
 
 .colophon__link:hover,
 .colophon__link:focus-visible {
-  color: var(--text);
+  color: var(--accent);
 }
 
 @media (max-width: 480px) {
@@ -2317,7 +2226,7 @@ body:has(.page--writing) .colophon {
 .not-found h1 {
   margin: 0 0 16px;
   font-family: var(--sans);
-  font-size: clamp(1.6rem, 3.4vw, 2.2rem);
+  font-size: var(--type-title);
   font-weight: 600;
   letter-spacing: -0.025em;
   color: var(--text);
@@ -2350,6 +2259,6 @@ body:has(.page--writing) .colophon {
   }
   /* The renderer freezes the scene; preserve the normal visual weight. */
   .signal-field {
-    opacity: 0.68;
+    opacity: 0.56;
   }
 }

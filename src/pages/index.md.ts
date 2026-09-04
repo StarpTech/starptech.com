@@ -4,11 +4,11 @@ const md = `# Dustin Deus
 
 > Founder and engineer. Former co-founder & CTO at WunderGraph. Now Founding Engineer at Leverage Computer, building the company computer.
 
-**I build from zero. Companies, teams, and the systems underneath.**
+**I build companies. And the systems underneath.**
 
-I co-founded [WunderGraph](https://wundergraph.com) and helped turn it from an idea into a real company. The first product failed. We built Cosmo in four weeks, raised Seed and Series A, and today it helps teams at eBay, SoundCloud, Paramount, and others handle tens of billions of API requests.
+I co-founded [WunderGraph](https://wundergraph.com). Our first product failed; four weeks later, we built Cosmo. We raised Seed and Series A, and today it handles tens of billions of API requests for teams including eBay, SoundCloud, and Paramount.
 
-I hired every engineer and helped shape a culture around ego-less collaboration, openness, ownership, and high standards. Building something that supports dozens of people and their families changes you. That experience still shapes how I build.
+I helped build the engineering team and a low-ego engineering culture of openness, ownership, and high standards. That experience changed how I think about leadership and still shapes how I build.
 
 ## Now
 
