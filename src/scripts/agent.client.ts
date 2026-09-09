@@ -17,7 +17,7 @@ function setTheme(next: "dark" | "light") {
   document.documentElement.dataset.theme = next;
   document
     .getElementById("themeColor")
-    ?.setAttribute("content", next === "dark" ? "#141516" : "#f7f7f5");
+    ?.setAttribute("content", next === "dark" ? "#161514" : "#f7f7f5");
   try {
     localStorage.setItem("theme", next);
   } catch {}

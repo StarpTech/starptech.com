@@ -34,7 +34,7 @@ const iconSvg = readFileSync(
 const iconDataUri = `data:image/svg+xml;base64,${Buffer.from(iconSvg).toString("base64")}`;
 
 // Brand tokens, mirrored from src/styles/global.css (dark theme).
-const BG = "#141516";
+const BG = "#161514";
 const TEXT = "#efefec";
 const MUTED = "#a4a5a7";
 const GRADIENT = ["#c2c5ca", "#9fa5ad", "#73a8d8", "#c2c5ca"];

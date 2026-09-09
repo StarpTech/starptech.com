@@ -43,9 +43,13 @@
   --accent: #2f6f9f;
   --writing-accent: #2f6f9f;
   --writing-accent-2: #6b7078;
-  /* The ambient system keeps its original identity independently of the UI. */
-  --signal-accent-1: #655bd7;
-  --signal-accent-2: #b04a78;
+  /* The ambient system speaks in the same blue as the UI, one cool voice
+     against the warm disk. */
+  --signal-accent-1: #2f6f9f;
+  --signal-accent-2: #7fa6c4;
+  /* Second hero line: soft in light mode, a touch warm in dark mode so it
+     sits between the white headline and the cream of the disk. */
+  --text-hero: var(--text-soft);
 
   --type-display: clamp(2.35rem, 7vw, 4.25rem);
   --type-title: clamp(1.55rem, 3.8vw, 2rem);
@@ -67,18 +71,19 @@
 }
 
 :root[data-theme="dark"] {
-  --bg: #141516;
-  --bg-1: #191a1b;
+  --bg: #161514;
+  --bg-1: #1b1a19;
   --text: #efefec;
   --text-soft: #a4a5a7;
   --muted: #737578;
-  --line: #292b2d;
-  --line-strong: #414448;
+  --line: #2b2a29;
+  --line-strong: #444240;
   --accent: #73a8d8;
   --writing-accent: #73a8d8;
   --writing-accent-2: #c2c5ca;
-  --signal-accent-1: #8b9cf6;
-  --signal-accent-2: #ef88b4;
+  --signal-accent-1: #73a8d8;
+  --signal-accent-2: #a9c9e6;
+  --text-hero: #aaa6a0;
 }
 
 /* ----------------------------------------------------------------------------
@@ -330,7 +335,7 @@ article p {
 .home-hero__accent {
   display: block;
   margin-top: 0.14em;
-  color: var(--text-soft);
+  color: var(--text-hero);
 }
 
 /* Signal field + black hole — atmosphere around, quiet beneath the writing. */
@@ -340,7 +345,9 @@ article p {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  opacity: 0.56;
+  /* Full opacity so the black hole can burn white; the grid, stars, and
+     agents are dimmed in the script instead. */
+  opacity: 1;
 }
 
 .signal-field::after {
@@ -383,7 +390,7 @@ article p {
     width: 100%;
     height: 100vh;
     height: 100lvh;
-    opacity: 0.48;
+    opacity: 1;
   }
 
   .signal-field::after {

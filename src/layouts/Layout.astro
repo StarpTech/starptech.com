@@ -185,7 +185,7 @@ const structuredData = {
     <meta name="description" content={description} />
     <meta name="author" content="Dustin Deus" />
     <meta name="robots" content={robots} />
-    <meta id="themeColor" name="theme-color" content="#141516" />
+    <meta id="themeColor" name="theme-color" content="#161514" />
     <meta name="generator" content={Astro.generator} />
 
     <link rel="canonical" href={canonical} />
@@ -258,7 +258,7 @@ const structuredData = {
         document.documentElement.dataset.theme = theme;
         document.getElementById("themeColor")?.setAttribute(
           "content",
-          theme === "dark" ? "#141516" : "#f7f7f5",
+          theme === "dark" ? "#161514" : "#f7f7f5",
         );
       } catch {
         document.documentElement.dataset.theme = "dark";
