@@ -31,25 +31,23 @@
  * ------------------------------------------------------------------------- */
 
 :root {
-  color-scheme: light dark;
+  color-scheme: dark;
 
-  --bg: #f7f7f5;
-  --bg-1: #fcfcfa;
-  --text: #18191a;
-  --text-soft: #505256;
-  --muted: #6f7277;
-  --line: #dededb;
-  --line-strong: #bfc1c4;
-  --accent: #2f6f9f;
-  --writing-accent: #2f6f9f;
-  --writing-accent-2: #6b7078;
-  /* The ambient system speaks in the same blue as the UI, one cool voice
-     against the warm disk. */
-  --signal-accent-1: #2f6f9f;
-  --signal-accent-2: #7fa6c4;
-  /* Second hero line: soft in light mode, a touch warm in dark mode so it
-     sits between the white headline and the cream of the disk. */
-  --text-hero: var(--text-soft);
+  --bg: #161514;
+  --bg-1: #1b1a19;
+  --text: #efefec;
+  --text-soft: #a4a5a7;
+  --muted: #737578;
+  --line: #2b2a29;
+  --line-strong: #444240;
+  --accent: #73a8d8;
+  --writing-accent: #73a8d8;
+  --writing-accent-2: #c2c5ca;
+  --signal-accent-1: #73a8d8;
+  --signal-accent-2: #a9c9e6;
+  /* Second hero line: a touch warm, between the white headline and the
+     painting. */
+  --text-hero: #aaa6a0;
 
   --type-display: clamp(2.35rem, 7vw, 4.25rem);
   --type-title: clamp(1.55rem, 3.8vw, 2rem);
@@ -68,22 +66,6 @@
 
   font-family: var(--sans);
   font-feature-settings: "ss01" 1, "ss02" 1, "cv11" 1, "cv01" 1;
-}
-
-:root[data-theme="dark"] {
-  --bg: #161514;
-  --bg-1: #1b1a19;
-  --text: #efefec;
-  --text-soft: #a4a5a7;
-  --muted: #737578;
-  --line: #2b2a29;
-  --line-strong: #444240;
-  --accent: #73a8d8;
-  --writing-accent: #73a8d8;
-  --writing-accent-2: #c2c5ca;
-  --signal-accent-1: #73a8d8;
-  --signal-accent-2: #a9c9e6;
-  --text-hero: #aaa6a0;
 }
 
 /* ----------------------------------------------------------------------------
@@ -163,11 +145,11 @@ body.has-spotlight::after {
   opacity: 0.16;
 }
 
-:root[data-theme="dark"] body.has-spotlight::before {
+body.has-spotlight::before {
   opacity: 0.18;
 }
 
-:root[data-theme="dark"] body.has-spotlight::after {
+body.has-spotlight::after {
   opacity: 0.22;
 }
 
@@ -278,13 +260,253 @@ body.has-spotlight::after {
   color: var(--muted);
 }
 
-/* role label is long; stack earlier so it doesn't squeeze the nav */
+/* menu — a button on small screens that opens a sheet from the right */
+.menu-button,
+.site-menu {
+  display: none;
+}
+
 @media (max-width: 600px) {
   .masthead {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
+    align-items: center;
     margin-bottom: clamp(28px, 5vh, 48px);
+  }
+
+  .masthead__role,
+  .masthead__sep,
+  .masthead__link {
+    display: none;
+  }
+
+  .menu-button {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 44px;
+    height: 44px;
+    margin-right: -10px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    transition:
+      color var(--transition-ui),
+      background-color var(--transition-ui);
+  }
+
+  .menu-button span {
+    display: block;
+    width: 20px;
+    height: 1.5px;
+    border-radius: 1px;
+    background: currentColor;
+    transition:
+      width 0.28s cubic-bezier(0.2, 0.8, 0.2, 1),
+      margin 0.28s cubic-bezier(0.2, 0.8, 0.2, 1),
+      transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .menu-button span:last-child {
+    width: 14px;
+    margin-left: 6px;
+  }
+
+  .menu-button:hover,
+  .menu-button:focus-visible {
+    color: var(--accent);
+    background-color: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+
+  .menu-button:hover span:first-child,
+  .menu-button:focus-visible span:first-child {
+    transform: translateX(-3px);
+  }
+
+  .menu-button:hover span:last-child,
+  .menu-button:focus-visible span:last-child {
+    width: 20px;
+    margin-left: 0;
+  }
+
+  .menu-button:active span {
+    transform: scaleX(0.85);
+  }
+
+  .site-menu {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: block;
+  }
+
+  .site-menu[hidden] {
+    display: none;
+  }
+
+  .site-menu__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgb(0 0 0 / 0.55);
+    opacity: 0;
+    transition: opacity 0.22s ease;
+  }
+
+  .site-menu__panel {
+    position: absolute;
+    inset: 0 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    width: min(86vw, 340px);
+    padding: 18px 24px 32px;
+    overflow-y: auto;
+    border-left: 1px solid var(--line);
+    background: var(--bg-1);
+    transform: translateX(100%);
+    transition: transform 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .site-menu.is-open .site-menu__backdrop {
+    opacity: 1;
+  }
+
+  .site-menu.is-open .site-menu__panel {
+    transform: none;
+  }
+
+  .site-menu__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .site-menu__role {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.02em;
+    color: var(--muted);
+  }
+
+  .site-menu__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-right: -12px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-soft);
+    cursor: pointer;
+    transition:
+      color var(--transition-ui),
+      background-color var(--transition-ui);
+  }
+
+  .site-menu__close svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    transition: transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .site-menu__close:hover,
+  .site-menu__close:focus-visible {
+    color: var(--accent);
+    background-color: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+
+  .site-menu__close:hover svg,
+  .site-menu__close:focus-visible svg {
+    transform: rotate(90deg);
+  }
+
+  .site-menu__panel:focus {
+    outline: none;
+  }
+
+  .site-menu ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-menu__primary {
+    display: grid;
+    gap: 4px;
+  }
+
+  .site-menu__primary a {
+    display: block;
+    padding: 6px 0;
+    font-size: 1.9rem;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .site-menu__primary a[aria-current="page"] {
+    color: var(--muted);
+  }
+
+  .site-menu__section h2 {
+    margin: 0 0 10px;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .site-menu__section li + li {
+    border-top: 1px solid var(--line);
+  }
+
+  .site-menu__section a {
+    display: block;
+    padding: 11px 0;
+    font-size: 0.98rem;
+    line-height: 1.4;
+    color: var(--text-soft);
+    text-decoration: none;
+  }
+
+  .site-menu a:hover,
+  .site-menu a:focus-visible {
+    color: var(--accent);
+  }
+
+  .menu-open,
+  .menu-open body {
+    overflow: hidden;
+  }
+
+  /* the sheet lives inside the page; lift the page above the footer */
+  .menu-open .page {
+    z-index: 30;
+  }
+}
+
+@media (max-width: 600px) and (prefers-reduced-motion: reduce) {
+  .site-menu__backdrop,
+  .site-menu__panel,
+  .menu-button span,
+  .site-menu__close svg {
+    transition: none;
   }
 }
 
@@ -350,30 +572,20 @@ article p {
   opacity: 1;
 }
 
+/* A soft pool of page colour behind the text column keeps the copy readable
+   without boxing in the scene. */
 .signal-field::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(
-    90deg,
-    transparent 0 calc(50% - 27rem),
-    var(--bg) calc(50% - 23rem) calc(50% + 23rem),
-    transparent calc(50% + 27rem) 100%
+  background: radial-gradient(
+    ellipse min(34rem, 70vw) 75% at 50% 50%,
+    var(--bg) 0%,
+    color-mix(in srgb, var(--bg) 60%, transparent) 60%,
+    transparent 100%
   );
-  opacity: 0.66;
-}
-
-:root[data-theme="dark"] .signal-field::after {
-  opacity: 0.66;
-}
-
-:root:not([data-theme="dark"]) .signal-field::after {
-  opacity: 0.58;
-}
-
-:root:not([data-theme="dark"]) .signal-field {
-  opacity: 1;
+  opacity: 0.74;
 }
 
 .signal-field canvas {
@@ -395,15 +607,296 @@ article p {
 
   .signal-field::after {
     background: var(--bg);
-    opacity: 0.56;
+    opacity: 0.6;
+  }
+}
+
+/* Homepage painting — fixed on the left, dissolving into the page on its
+   right, top, and bottom edges so the writing sits beside it, not on a box. */
+.shore-art {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 0;
+  width: clamp(340px, 40vw, 700px);
+  overflow: hidden;
+  /* a hard clip: the drifting, scaled layer can otherwise bleed a pixel */
+  clip-path: inset(0);
+  pointer-events: none;
+}
+
+/* The fade is painted in the page colour on top of the painting rather than
+   masked, which keeps it reliable while the frame drifts underneath. */
+.shore-art::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: 1;
+  /* eased (smoothstep) fades: no visible start or end to the dissolve */
+  background:
+    linear-gradient(
+      to right,
+      transparent 28%,
+      color-mix(in srgb, var(--bg) 4.3%, transparent) 36.75%,
+      color-mix(in srgb, var(--bg) 15.6%, transparent) 45.5%,
+      color-mix(in srgb, var(--bg) 31.6%, transparent) 54.25%,
+      color-mix(in srgb, var(--bg) 50%, transparent) 63%,
+      color-mix(in srgb, var(--bg) 68.4%, transparent) 71.75%,
+      color-mix(in srgb, var(--bg) 84.4%, transparent) 80.5%,
+      color-mix(in srgb, var(--bg) 95.7%, transparent) 89.25%,
+      var(--bg) 98%
+    ),
+    linear-gradient(
+      to bottom,
+      var(--bg) 0%,
+      color-mix(in srgb, var(--bg) 95.7%, transparent) 1.75%,
+      color-mix(in srgb, var(--bg) 84.4%, transparent) 3.5%,
+      color-mix(in srgb, var(--bg) 68.4%, transparent) 5.25%,
+      color-mix(in srgb, var(--bg) 50%, transparent) 7%,
+      color-mix(in srgb, var(--bg) 31.6%, transparent) 8.75%,
+      color-mix(in srgb, var(--bg) 15.6%, transparent) 10.5%,
+      color-mix(in srgb, var(--bg) 4.3%, transparent) 12.25%,
+      transparent 14%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 80%,
+      color-mix(in srgb, var(--bg) 4.3%, transparent) 82.5%,
+      color-mix(in srgb, var(--bg) 15.6%, transparent) 85%,
+      color-mix(in srgb, var(--bg) 31.6%, transparent) 87.5%,
+      color-mix(in srgb, var(--bg) 50%, transparent) 90%,
+      color-mix(in srgb, var(--bg) 68.4%, transparent) 92.5%,
+      color-mix(in srgb, var(--bg) 84.4%, transparent) 95%,
+      color-mix(in srgb, var(--bg) 95.7%, transparent) 97.5%,
+      var(--bg) 100%
+    );
+}
+
+.shore-art__frame {
+  position: absolute;
+  /* stop short of the faded bottom edge so no partial pixel row shows */
+  inset: 0 0 4px 0;
+  transform-origin: 38% 62%;
+  animation: artDrift 70s ease-in-out infinite alternate;
+}
+
+.shore-art__img,
+.shore-art__light {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.shore-art__img {
+  object-fit: cover;
+  object-position: var(--art-pos, 50% 50%);
+}
+
+.shore-art__img[data-art="1"] {
+  --art-pos: 50% 50%;
+}
+
+.shore-art__img[data-art="2"] {
+  --art-pos: 50% 40%;
+}
+
+/* Stepping through: the next painting opens outward from the walker in a
+   soft-edged circle while the current one dims. */
+@property --reveal {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+.shore-art__next {
+  visibility: hidden;
+  -webkit-mask-image: radial-gradient(
+    circle at var(--rx, 50%) var(--ry, 50%),
+    #000 calc(var(--reveal) - 140px),
+    transparent var(--reveal)
+  );
+  mask-image: radial-gradient(
+    circle at var(--rx, 50%) var(--ry, 50%),
+    #000 calc(var(--reveal) - 140px),
+    transparent var(--reveal)
+  );
+  transform: scale(1.03);
+}
+
+.shore-art.is-revealing .shore-art__next {
+  visibility: visible;
+  transform: scale(1);
+  transition:
+    --reveal 1.7s cubic-bezier(0.65, 0, 0.2, 1),
+    transform 1.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.shore-art__img:not(.shore-art__next) {
+  transition: filter 1.7s ease;
+}
+
+.shore-art.is-revealing .shore-art__img:not(.shore-art__next) {
+  filter: brightness(0.6);
+}
+
+.shore-art.is-settling .shore-art__img {
+  transition: none !important;
+}
+
+.shore-art__light {
+  transition: opacity 0.5s ease;
+}
+
+.shore-art.is-revealing .shore-art__light {
+  opacity: 0;
+}
+
+/* The walker is a quiet door to the other painting: no ornament, just a
+   pointer for whoever finds it. */
+.shore-gem {
+  z-index: 5;
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.shore-gem[hidden] {
+  display: none;
+}
+
+.shore-gem:focus-visible {
+  outline: 1px solid color-mix(in srgb, var(--accent) 70%, transparent);
+  outline-offset: 2px;
+}
+
+
+@keyframes artDrift {
+  from {
+    transform: scale(1.03) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.09) translate3d(-1.2%, -1.8%, 0);
+  }
+}
+
+@media (min-width: 1101px) {
+  .page--home,
+  body:has(.page--home) .colophon {
+    width: min(40rem, calc(100% - 2.5rem));
+    margin-left: max(calc(clamp(340px, 40vw, 700px) - 1.5rem), calc((100% - 40rem) / 2));
+    margin-right: auto;
+  }
+}
+
+/* Narrower screens: the painting becomes a tall band at the top, and the
+   page starts over its fading lower edge. */
+@media (max-width: 1100px) {
+  .shore-art {
+    position: absolute;
+    inset: 0 0 auto 0;
+    width: 100%;
+    height: min(66vh, 640px);
+    /* whole pixels: a fractional edge lets the drifting layer peek through */
+    height: round(down, min(66vh, 640px), 1px);
   }
 
-  :root:not([data-theme="dark"]) .signal-field {
-    opacity: 1;
+  /* solid behind the header, vivid in the middle, and only a short eased
+     edge at the bottom */
+  .shore-art::after {
+    background:
+      linear-gradient(
+        to bottom,
+        var(--bg) 72px,
+        color-mix(in srgb, var(--bg) 95.7%, transparent) 78.5px,
+        color-mix(in srgb, var(--bg) 84.4%, transparent) 85px,
+        color-mix(in srgb, var(--bg) 68.4%, transparent) 91.5px,
+        color-mix(in srgb, var(--bg) 50%, transparent) 98px,
+        color-mix(in srgb, var(--bg) 31.6%, transparent) 104.5px,
+        color-mix(in srgb, var(--bg) 15.6%, transparent) 111px,
+        color-mix(in srgb, var(--bg) 4.3%, transparent) 117.5px,
+        transparent 124px
+      ),
+      linear-gradient(
+        to bottom,
+        transparent 82%,
+        color-mix(in srgb, var(--bg) 4.3%, transparent) 84.25%,
+        color-mix(in srgb, var(--bg) 15.6%, transparent) 86.5%,
+        color-mix(in srgb, var(--bg) 31.6%, transparent) 88.75%,
+        color-mix(in srgb, var(--bg) 50%, transparent) 91%,
+        color-mix(in srgb, var(--bg) 68.4%, transparent) 93.25%,
+        color-mix(in srgb, var(--bg) 84.4%, transparent) 95.5%,
+        color-mix(in srgb, var(--bg) 95.7%, transparent) 97.75%,
+        var(--bg) 100%
+      );
   }
 
-  :root:not([data-theme="dark"]) .signal-field::after {
-    opacity: 0.62;
+  .page--home .masthead,
+  .page--home .home-hero {
+    text-shadow:
+      0 1px 2px rgb(0 0 0 / 0.5),
+      0 2px 18px rgb(0 0 0 / 0.7);
+  }
+
+  .shore-art__img[data-art="1"] {
+    --art-pos: 50% 66%;
+  }
+
+  .shore-art__img[data-art="2"] {
+    --art-pos: 50% 38%;
+  }
+
+  /* header hugs the top so the painting starts right beneath it */
+  .page--home {
+    padding-top: 26px;
+  }
+
+  /* no menu button above 600px, so the header row is shorter: drop it to
+     the middle of the dark strip */
+  @media (min-width: 601px) {
+    .page--home {
+      padding-top: 38px;
+    }
+  }
+
+  .page--home .masthead {
+    margin-bottom: 0;
+  }
+
+  /* Pin the headline's last line just above the painting's bottom edge:
+     band height minus the header row minus three lines of display type.
+     The story then starts after a clear gap of page background. */
+  .page--home {
+    --head-row: 70px;
+    --hero-size: clamp(2.5rem, 7.4vw, 4.75rem);
+  }
+
+  @media (min-width: 601px) {
+    .page--home {
+      --head-row: 46px;
+    }
+  }
+
+  .page--home .home {
+    padding-top: max(
+      120px,
+      calc(round(down, min(66vh, 640px), 1px) - var(--head-row) - 3.1 * var(--hero-size) - 14px)
+    );
+  }
+
+  .page--home .home-hero {
+    margin-bottom: 58px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shore-art__frame {
+    animation: none;
+    transition: none;
   }
 }
 
@@ -508,16 +1001,6 @@ article b {
   margin: 0 0 clamp(42px, 7vh, 64px);
 }
 
-.writing-index__eyebrow {
-  margin: 0 0 16px;
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  line-height: 1.5;
-  letter-spacing: 0.045em;
-  text-transform: uppercase;
-  color: var(--writing-accent);
-}
-
 .writing-index__title {
   max-width: 13ch;
   margin: 0 0 20px;
@@ -542,136 +1025,6 @@ article b {
   font-size: 0.96rem;
 }
 
-.featured-note {
-  display: flex;
-  flex-direction: column;
-  padding: clamp(22px, 4vw, 32px);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--bg-1);
-  color: var(--text);
-  text-decoration: none;
-  transition:
-    border-color var(--transition-ui),
-    background var(--transition-ui);
-}
-
-.featured-note:hover,
-.featured-note:focus-visible {
-  border-color: color-mix(in srgb, var(--writing-accent) 40%, var(--line));
-  background: color-mix(in srgb, var(--writing-accent) 3%, var(--bg-1));
-}
-
-.featured-note__meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 10px;
-  margin: 0 0 clamp(18px, 3vh, 24px);
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  line-height: 1.5;
-  letter-spacing: 0.02em;
-  text-transform: lowercase;
-  color: var(--muted);
-}
-
-.featured-note__latest {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  margin-right: 4px;
-  padding: 2px 9px 2px 8px;
-  border: 1px solid color-mix(in srgb, var(--writing-accent) 35%, var(--line));
-  border-radius: 999px;
-  color: var(--writing-accent);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.featured-note__latest::before {
-  content: "";
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: currentColor;
-}
-
-.featured-note__meta > span[aria-hidden="true"] {
-  color: var(--line-strong);
-}
-
-.featured-note__title {
-  max-width: 22ch;
-  margin: 0 0 12px;
-  font-size: var(--type-title);
-  font-weight: 600;
-  line-height: 1.1;
-  letter-spacing: -0.04em;
-  text-wrap: balance;
-}
-
-.featured-note__description {
-  max-width: 58ch;
-  margin: 0;
-  font-size: 1rem;
-  line-height: 1.6;
-  color: var(--text-soft);
-  text-wrap: pretty;
-}
-
-.featured-note__read {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: clamp(22px, 4vh, 30px);
-  padding-top: 16px;
-  border-top: 1px solid var(--line);
-  font-family: var(--mono);
-  font-size: var(--type-ui);
-  color: var(--text-soft);
-}
-
-.featured-note__read span {
-  color: var(--muted);
-  transition:
-    transform var(--transition-ui),
-    color var(--transition-ui);
-}
-
-.featured-note__title,
-.featured-note__read {
-  transition: color var(--transition-ui);
-}
-
-.featured-note:hover .featured-note__title,
-.featured-note:focus-visible .featured-note__title,
-.featured-note:hover .featured-note__read,
-.featured-note:focus-visible .featured-note__read,
-.featured-note:hover .featured-note__read span,
-.featured-note:focus-visible .featured-note__read span {
-  color: var(--writing-accent);
-}
-
-.featured-note:hover .featured-note__read span,
-.featured-note:focus-visible .featured-note__read span {
-  transform: translateX(4px);
-}
-
-.writing-archive {
-  margin-top: clamp(44px, 7vh, 70px);
-}
-
-.writing-archive__title {
-  margin: 0 0 14px;
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  font-weight: 400;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
 .writing-list {
   list-style: none;
   margin: 0;
@@ -685,53 +1038,31 @@ article b {
 
 .writing-list__link {
   display: grid;
-  grid-template-columns: 6.5rem minmax(0, 1fr) auto;
+  grid-template-columns: 7rem minmax(0, 1fr);
   gap: clamp(16px, 3vw, 32px);
   align-items: baseline;
-  padding: clamp(18px, 3vw, 26px) 0;
+  padding: 22px 0;
   text-decoration: none;
   color: var(--text);
-  transition: background var(--transition-ui);
-  min-height: 44px;
-}
-
-.writing-list__link:hover {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in srgb, var(--accent) 4%, transparent),
-    transparent
-  );
 }
 
 .writing-list__date {
   font-family: var(--mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.01em;
+  font-size: 0.72rem;
   color: var(--muted);
   white-space: nowrap;
-  padding-top: 4px;
 }
 
 .writing-list__copy {
   min-width: 0;
 }
 
-.writing-list__category {
-  margin: 0 0 7px;
-  color: var(--muted);
-  font-family: var(--mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  text-transform: lowercase;
-}
-
 .writing-list__title {
   margin: 0 0 6px;
-  font-size: 1.12rem;
-  font-weight: 600;
-  letter-spacing: -0.012em;
-  line-height: 1.32;
+  font-size: 1.08rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
   color: var(--text);
   transition: color var(--transition-ui);
 }
@@ -742,31 +1073,12 @@ article b {
 }
 
 .writing-list__description {
+  max-width: 60ch;
   margin: 0;
   font-size: 0.95rem;
   line-height: 1.55;
   color: var(--muted);
   text-wrap: pretty;
-}
-
-.writing-list__arrow {
-  color: var(--muted);
-  font-family: var(--mono);
-  font-size: 1rem;
-  transition:
-    transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
-    color var(--transition-ui);
-  align-self: center;
-}
-
-.writing-list__link:hover .writing-list__arrow,
-.writing-list__link:focus-visible .writing-list__arrow {
-  transform: translateX(4px);
-  color: var(--accent);
-}
-
-.writing-list__link:focus-visible {
-  border-radius: 2px;
 }
 
 @media (max-width: 540px) {
@@ -778,25 +1090,10 @@ article b {
     max-width: 18ch;
   }
 
-  .featured-note {
-    padding: 20px 18px;
-  }
-
-  .featured-note__meta > span[aria-hidden="true"] {
-    display: none;
-  }
-
   .writing-list__link {
     grid-template-columns: 1fr;
-    gap: 4px;
+    gap: 6px;
     padding: 18px 0;
-  }
-  .writing-list__date {
-    order: -1;
-    padding-top: 0;
-  }
-  .writing-list__arrow {
-    display: none;
   }
 }
 
@@ -1024,10 +1321,10 @@ article b {
 /* -- lightweight inference diagrams ---------------------------------------- */
 
 .post__body .inference-viz {
-  --viz-accent: #4f46e5;
-  --viz-accent-2: #0891b2;
-  --viz-warm: #b45309;
-  --viz-line: color-mix(in srgb, var(--line-strong) 84%, transparent);
+  --viz-accent: #93a4ff;
+  --viz-accent-2: #67e8f9;
+  --viz-warm: #fbbf24;
+  --viz-line: color-mix(in srgb, var(--line-strong) 88%, transparent);
   --viz-dim: color-mix(in srgb, var(--muted) 58%, transparent);
 
   position: relative;
@@ -1038,13 +1335,6 @@ article b {
   background: color-mix(in srgb, var(--bg-1) 36%, transparent);
   font-family: var(--mono);
   overflow: hidden;
-}
-
-:root[data-theme="dark"] .post__body .inference-viz {
-  --viz-accent: #93a4ff;
-  --viz-accent-2: #67e8f9;
-  --viz-warm: #fbbf24;
-  --viz-line: color-mix(in srgb, var(--line-strong) 88%, transparent);
 }
 
 .post__body .inference-viz figcaption {
@@ -2399,13 +2689,6 @@ article b {
 
 .post__body pre.astro-code,
 .post__body pre.astro-code span {
-  color: var(--shiki-light);
-  background-color: transparent !important;
-}
-
-:root[data-theme="dark"] .post__body pre.astro-code,
-:root[data-theme="dark"] .post__body pre.astro-code span {
-  color: var(--shiki-dark) !important;
   background-color: transparent !important;
 }
 
@@ -2435,78 +2718,6 @@ article b {
 .post__body th {
   font-weight: 600;
   color: var(--text);
-}
-
-/* ----------------------------------------------------------------------------
- * theme toggle — bottom-right, tiny mono text
- * ----------------------------------------------------------------------- */
-
-.theme-toggle {
-  position: fixed;
-  top: clamp(12px, 2vh, 22px);
-  right: clamp(12px, 2vw, 22px);
-  z-index: 5;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--bg-1) 70%, transparent);
-  backdrop-filter: blur(10px) saturate(140%);
-  -webkit-backdrop-filter: blur(10px) saturate(140%);
-  color: var(--muted);
-  cursor: pointer;
-  overflow: hidden;
-  transition:
-    color 0.18s ease,
-    border-color 0.18s ease,
-    background 0.18s ease,
-    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.theme-toggle:hover {
-  color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 60%, var(--line-strong));
-}
-
-.theme-toggle:active {
-  transform: scale(0.92);
-}
-
-.tt-icon {
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  transition:
-    opacity 0.34s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.34s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* default (light mode) — sun visible */
-.tt-sun {
-  opacity: 1;
-  transform: rotate(0) scale(1);
-}
-
-.tt-moon {
-  opacity: 0;
-  transform: rotate(90deg) scale(0.5);
-}
-
-/* dark mode — moon visible */
-:root[data-theme="dark"] .tt-sun {
-  opacity: 0;
-  transform: rotate(-90deg) scale(0.5);
-}
-
-:root[data-theme="dark"] .tt-moon {
-  opacity: 1;
-  transform: rotate(0) scale(1);
 }
 
 /* ----------------------------------------------------------------------------

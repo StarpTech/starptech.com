@@ -1,834 +1,583 @@
-import type * as Three from "three";
+/* Night shore — a single full-screen shader behind the homepage.
+   Sky with aurora ribbons and four-point starlight, a glowing horizon with
+   island silhouettes, and bioluminescent wave fronts rolling onto a moonlit
+   shore. Plain WebGL2, one draw call, no scene graph. */
 
 const canvas = document.getElementById("signalField") as HTMLCanvasElement | null;
 
-if (canvas) {
-  const THREE = await import("three");
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const smallViewport = window.matchMedia("(max-width: 640px)").matches;
-  const root = document.documentElement;
-  const scene = new THREE.Scene();
-  const field = new THREE.Group();
-  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
-  const renderer = new THREE.WebGLRenderer({
-    alpha: true,
-    antialias: true,
-    canvas,
+const vertexSource = /* glsl */ `#version 300 es
+void main() {
+  // one oversized triangle that covers the viewport
+  vec2 p = vec2((gl_VertexID << 1) & 2, gl_VertexID & 2);
+  gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+}`;
+
+const fragmentSource = /* glsl */ `#version 300 es
+precision highp float;
+
+uniform vec2 uRes;
+uniform float uTime;
+uniform float uLight;
+uniform vec2 uPointer;
+
+out vec4 outColor;
+
+const float HORIZON = -0.03;
+const float PI = 3.14159265;
+
+float AA;
+
+float hash12(vec2 p) {
+  vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.x + p3.y) * p3.z);
+}
+
+vec2 hash22(vec2 p) {
+  vec3 p3 = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.xx + p3.yz) * p3.zy);
+}
+
+float noise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(
+    mix(hash12(i), hash12(i + vec2(1.0, 0.0)), u.x),
+    mix(hash12(i + vec2(0.0, 1.0)), hash12(i + vec2(1.0, 1.0)), u.x),
+    u.y
+  );
+}
+
+float fbm(vec2 p) {
+  float v = 0.0;
+  float a = 0.5;
+  for (int i = 0; i < 5; i++) {
+    v += a * noise(p);
+    p = mat2(1.6, 1.2, -1.2, 1.6) * p + vec2(17.1, 9.2);
+    a *= 0.5;
+  }
+  return v;
+}
+
+/* Light is added at night and painted on at dawn, so one scene serves both
+   themes. */
+void glow(inout vec3 col, vec3 c, float a) {
+  vec3 night = col + c * a;
+  vec3 dawn = mix(col, c * 0.72, clamp(a, 0.0, 1.0) * 0.5);
+  col = mix(night, dawn, uLight);
+}
+
+vec3 pick(vec3 night, vec3 dawn) {
+  return mix(night, dawn, uLight);
+}
+
+float sdSegment(vec2 p, vec2 a, vec2 b) {
+  vec2 pa = p - a;
+  vec2 ba = b - a;
+  return length(pa - ba * clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0));
+}
+
+// four-point starlight: soft core plus long, thin cross spikes
+float glint(vec2 d, float size, float stretch) {
+  vec2 a = abs(d);
+  float core = exp(-length(d) / (size * 0.14));
+  float halo = exp(-length(d) / (size * 0.6)) * 0.18;
+  float spikes =
+    exp(-a.x / (size * 0.025)) * exp(-a.y / (size * stretch)) +
+    exp(-a.y / (size * 0.025)) * exp(-a.x / size);
+  return core + halo + spikes * 0.8;
+}
+
+vec3 starTint(float h) {
+  if (h < 0.4) return vec3(0.9, 0.93, 1.0);
+  if (h < 0.62) return vec3(1.0, 0.82, 0.58);
+  if (h < 0.82) return vec3(1.0, 0.62, 0.82);
+  return vec3(0.55, 1.0, 0.92);
+}
+
+// ---------------------------------------------------------------- sky ----
+
+vec3 sky(vec2 p, float t) {
+  float sy = clamp((p.y - HORIZON) / (0.5 - HORIZON), 0.0, 1.0);
+  vec3 col = mix(
+    pick(vec3(0.06, 0.11, 0.3), vec3(0.97, 0.9, 0.86)),
+    pick(vec3(0.015, 0.025, 0.09), vec3(0.84, 0.86, 0.95)),
+    smoothstep(0.0, 0.9, sy)
+  );
+
+  // painted ribbons: a domain-warped flow with brush striations along it
+  vec2 q = vec2(p.x * 0.85 + t * 0.005, p.y * 1.5);
+  vec2 warp = vec2(
+    fbm(q * 1.3 + vec2(0.0, t * 0.01)),
+    fbm(q * 1.3 + vec2(5.2, 1.3) - t * 0.008)
+  );
+  float flow = fbm(vec2(q.x * 1.1 + warp.x * 1.9, q.y * 4.2 + warp.y * 2.6));
+  float strokes = 0.62 + 0.38 * noise(vec2(p.x * 2.4 + warp.x * 5.0, p.y * 85.0 + warp.y * 14.0));
+  float ribbons = smoothstep(0.32, 0.72, flow) * smoothstep(0.22, 0.8, sy);
+  vec3 violet = pick(vec3(0.34, 0.2, 0.86), vec3(0.7, 0.64, 0.92));
+  vec3 magenta = pick(vec3(0.82, 0.2, 0.5), vec3(0.92, 0.62, 0.74));
+  vec3 coral = pick(vec3(1.0, 0.45, 0.36), vec3(0.98, 0.72, 0.62));
+  vec3 ribbon = mix(violet, magenta, smoothstep(0.35, 0.75, warp.x));
+  ribbon = mix(ribbon, coral, smoothstep(0.66, 0.92, flow) * 0.7);
+  glow(col, ribbon, ribbons * strokes * 1.05);
+  // nebulous colour beneath the ribbons so the sky never reads as flat
+  float haze = fbm(p * 2.2 + warp * 1.5);
+  glow(col, mix(violet, magenta, haze) * 0.5, haze * haze * smoothstep(0.1, 0.9, sy) * 0.55);
+
+  // a faint milky band crossing the sky
+  float band = exp(-pow((p.y - 0.18 - p.x * 0.22) * 6.0, 2.0));
+  glow(col, pick(vec3(0.22, 0.3, 0.6), vec3(0.8, 0.82, 0.92)), band * fbm(p * 6.0 + 3.0) * 0.22);
+
+  glow(col, pick(vec3(0.08, 0.55, 0.6), vec3(0.55, 0.82, 0.86)), exp(-sy * 11.0) * 0.6);
+  glow(col, pick(vec3(0.3, 0.14, 0.42), vec3(0.85, 0.72, 0.86)), exp(-sy * 3.5) * 0.2);
+  return col;
+}
+
+vec3 stars(vec2 p, float t) {
+  vec3 col = vec3(0.0);
+
+  for (int l = 0; l < 3; l++) {
+    float fl = float(l);
+    float scale = mix(190.0, 60.0, fl * 0.5);
+    vec2 g = p * scale;
+    vec2 id = floor(g);
+    float h = hash12(id + fl * 31.7);
+    if (h > mix(0.86, 0.95, fl * 0.5)) {
+      vec2 o = (hash22(id) - 0.5) * 0.7;
+      float d = length(fract(g) - 0.5 - o);
+      float tw = 0.55 + 0.45 * sin(t * (0.8 + h * 2.6) + h * 40.0);
+      col += smoothstep(0.16, 0.0, d) * tw * mix(0.45, 1.0, fl * 0.5) * starTint(hash12(id + 7.0));
+    }
+  }
+
+  float scale = 7.0;
+  vec2 g = p * scale;
+  vec2 id = floor(g);
+  for (int j = -1; j <= 1; j++) {
+    for (int i = -1; i <= 1; i++) {
+      vec2 c = id + vec2(float(i), float(j));
+      float h = hash12(c * 1.7 + 3.1);
+      if (h < 0.84) continue;
+      vec2 d = (g - c - hash22(c)) / scale;
+      float size = mix(0.012, 0.05, pow(hash12(c + 11.0), 3.0));
+      float tw = 0.7 + 0.3 * sin(t * (0.5 + h) + h * 20.0);
+      col += glint(d, size, 1.3) * tw * starTint(hash12(c + 5.0));
+    }
+  }
+  return col;
+}
+
+// the bright stars again, as shimmering columns on the water
+vec3 starReflections(vec2 p, float t) {
+  vec3 col = vec3(0.0);
+  float scale = 7.0;
+  float cx = floor(p.x * scale);
+  float cy = floor(HORIZON * scale);
+  for (int i = -1; i <= 1; i++) {
+    for (int j = 0; j < 4; j++) {
+      vec2 c = vec2(cx + float(i), cy + float(j));
+      float h = hash12(c * 1.7 + 3.1);
+      if (h < 0.84) continue;
+      vec2 sp = (c + hash22(c)) / scale;
+      if (sp.y < HORIZON + 0.04) continue;
+      float size = mix(0.012, 0.05, pow(hash12(c + 11.0), 3.0));
+      float depth = HORIZON - p.y;
+      float width = 0.0015 + size * 0.1 + depth * 0.012;
+      float shimmer = smoothstep(0.4, 0.85, noise(vec2(sp.x * 60.0, p.y * 150.0 + t * 0.9)));
+      float column = exp(-abs(p.x - sp.x) / width) * shimmer * exp(-depth * 5.0);
+      col += starTint(hash12(c + 5.0)) * column * size * 26.0;
+    }
+  }
+  return col;
+}
+
+// --------------------------------------------------------------- palms ----
+
+/* One frond: a drooping rachis with comb-like leaflets that sweep toward
+   the tip. Returns coverage. */
+float frond(vec2 p, vec2 c, float ang, float len, float droop, float arch, float seed) {
+  vec2 dir = vec2(cos(ang), sin(ang));
+  vec2 nrm = vec2(-dir.y, dir.x);
+  vec2 q = p - c;
+  float u = dot(q, dir);
+  float s = u / len;
+  if (s < 0.0 || s > 1.0) return 0.0;
+  vec2 spine = c + dir * u + nrm * (arch * s * (1.0 - s) * len) - vec2(0.0, droop * s * s * len);
+  float v = dot(p - spine, nrm);
+  float av = abs(v);
+
+  float rachis = len * 0.01 * (1.0 - s * 0.7);
+  float cov = smoothstep(rachis + AA, rachis - AA, av);
+
+  float leafLen = len * 0.23 * pow(sin(PI * clamp(s * 1.08, 0.0, 1.0)), 0.75) * smoothstep(0.0, 0.08, s);
+  if (av < leafLen + AA) {
+    float spacing = len * 0.032;
+    float m = fract((u - av * 1.1) / spacing + seed);
+    float halfW = 0.33 * (1.0 - 0.6 * av / max(leafLen, 1e-4));
+    float aaCell = AA / spacing;
+    float leaf = smoothstep(halfW + aaCell, halfW - aaCell, abs(m - 0.5));
+    leaf *= smoothstep(leafLen + AA, leafLen - AA, av);
+    // a few torn leaflets
+    leaf *= step(0.12, hash12(vec2(floor((u - av * 1.1) / spacing + seed), seed + sign(v))));
+    cov = max(cov, leaf);
+  }
+  return cov;
+}
+
+float crown(vec2 p, vec2 c, float len, float seed, float t) {
+  if (length(p - c) > len * 1.25) return 0.0;
+  float cov = smoothstep(len * 0.05 + AA, len * 0.05 - AA, length(p - c - vec2(0.0, -len * 0.035)));
+  for (int i = 0; i < 13; i++) {
+    float fi = float(i);
+    float h = hash12(vec2(fi, seed));
+    float a = mix(-0.32 * PI, 1.32 * PI, fi / 12.0) + (h - 0.5) * 0.3;
+    a += sin(t * 0.55 + fi * 1.3 + seed) * 0.025;
+    float hang = 0.5 - 0.5 * sin(a); // fronds pointing sideways and down hang more
+    cov = max(cov, frond(p, c, a, len * (0.78 + 0.32 * h), 0.22 + 0.4 * hang + h * 0.1, 0.12, fi * 3.7 + seed));
+  }
+  return cov;
+}
+
+float trunk(vec2 p, vec2 base, vec2 top, float bend, float w0, float w1) {
+  vec2 ax = top - base;
+  float len = length(ax);
+  vec2 dir = ax / len;
+  vec2 nrm = vec2(-dir.y, dir.x);
+  vec2 q = p - base;
+  float along = dot(q, dir);
+  float k = clamp(along / len, 0.0, 1.0);
+  float off = dot(q, nrm) - bend * sin(k * PI) * len;
+  float w = mix(w0, w1, k) * (1.0 + 0.14 * smoothstep(0.7, 0.95, fract(k * len * 34.0)));
+  return smoothstep(w + AA, w - AA, abs(off)) * step(0.0, along) * step(along, len);
+}
+
+float foregroundPalms(vec2 p, float aspect, float t) {
+  float ex = aspect * 0.5;
+  float sc = clamp(aspect * 0.62, 0.55, 1.15);
+  if (abs(p.x) < ex - 0.52 * sc) return 0.0;
+  float lift = mix(0.4, 0.29, smoothstep(0.6, 1.3, aspect));
+
+  float cov = 0.0;
+  vec2 cl = vec2(-ex + 0.1 * sc, lift);
+  cov = max(cov, trunk(p, vec2(-ex - 0.07, -0.62), cl, 0.08, 0.026 * sc, 0.013 * sc));
+  cov = max(cov, crown(p, cl, 0.31 * sc, 1.0, t));
+
+  vec2 cr1 = vec2(ex - 0.14 * sc, lift - 0.1);
+  vec2 cr2 = vec2(ex - 0.01 * sc, lift + 0.07);
+  cov = max(cov, trunk(p, vec2(ex + 0.03, -0.62), cr1, -0.08, 0.027 * sc, 0.013 * sc));
+  cov = max(cov, trunk(p, vec2(ex + 0.12, -0.62), cr2, -0.05, 0.024 * sc, 0.012 * sc));
+  cov = max(cov, crown(p, cr1, 0.28 * sc, 2.0, t));
+  cov = max(cov, crown(p, cr2, 0.25 * sc, 3.0, t));
+  return cov;
+}
+
+float islandHeight(float x, float aspect) {
+  float right = smoothstep(0.12 * aspect, 0.36 * aspect, x);
+  float left = smoothstep(-0.2 * aspect, -0.4 * aspect, x);
+  float canopy = fbm(vec2(x * 7.0, 1.3)) * 0.035 + noise(vec2(x * 60.0, 7.0)) * 0.007;
+  return right * (0.022 + canopy) + left * (0.016 + canopy * 0.7);
+}
+
+float distantPalms(vec2 p, float aspect, float t) {
+  if (p.y > HORIZON + 0.12) return 0.0;
+  float cov = 0.0;
+  for (int i = 0; i < 5; i++) {
+    float fi = float(i);
+    float side = i < 3 ? 1.0 : -1.0;
+    float x = side * aspect * (0.3 + fi * 0.035 - (side < 0.0 ? 0.05 : 0.0));
+    float h = 0.045 + hash12(vec2(fi, 9.0)) * 0.035;
+    vec2 base = vec2(x, HORIZON + islandHeight(x, aspect) - 0.004);
+    vec2 top = base + vec2(-side * 0.008, h);
+    if (abs(p.x - top.x) > h * 0.7) continue;
+    cov = max(cov, trunk(p, base, top, 0.05 * side, 0.0016, 0.001));
+    cov = max(cov, crown(p, top, h * 0.45, fi + 9.0, t));
+  }
+  return cov;
+}
+
+float figure(vec2 p, vec2 feet, float h, float lean) {
+  float d = sdSegment(p, feet + vec2(-0.09 * h, 0.0), feet + vec2(-0.04 * h, 0.46 * h)) - 0.05 * h;
+  d = min(d, sdSegment(p, feet + vec2(0.08 * h, 0.0), feet + vec2(0.04 * h, 0.46 * h)) - 0.05 * h);
+  d = min(d, sdSegment(p, feet + vec2(0.0, 0.46 * h), feet + vec2(lean * h, 0.8 * h)) - 0.12 * h);
+  d = min(d, length(p - feet - vec2(lean * h * 1.15, 0.93 * h)) - 0.075 * h);
+  return d;
+}
+
+float shoreline(float x) {
+  return -0.36 + 0.03 * sin(x * 2.1 + 0.4) + 0.014 * sin(x * 5.3 - 1.0);
+}
+
+// ---------------------------------------------------------------- main ----
+
+void main() {
+  vec2 frag = gl_FragCoord.xy;
+  vec2 p = (frag - 0.5 * uRes) / uRes.y;
+  float aspect = uRes.x / uRes.y;
+  float t = uTime;
+  AA = 1.1 / uRes.y;
+  vec3 col;
+
+  vec2 sp = p + vec2(uPointer.x * 0.01, uPointer.y * 0.006);
+  float s = shoreline(p.x);
+
+  if (p.y >= HORIZON) {
+    col = sky(sp, t);
+    float sy = (p.y - HORIZON) / (0.5 - HORIZON);
+    glow(col, stars(sp, t), smoothstep(0.02, 0.25, sy) * (1.0 - uLight * 0.75));
+
+    // shooting stars
+    float period = 11.0;
+    float k = floor(t / period);
+    float local = t - k * period;
+    if (local < 1.2) {
+      vec2 a = vec2((hash12(vec2(k, 1.0)) - 0.5) * aspect * 0.9, 0.3 + hash12(vec2(k, 2.0)) * 0.16);
+      vec2 dir = normalize(vec2(-1.0, -0.45));
+      float prog = local / 1.2;
+      vec2 rel = sp - (a + dir * prog * 0.5);
+      float along = dot(rel, -dir);
+      float across = length(rel + dir * along);
+      float trail = smoothstep(0.25, 0.0, along) * step(0.0, along) * exp(-across * 1100.0);
+      glow(col, vec3(0.9, 0.95, 1.0), (trail + exp(-length(rel) * 300.0)) * sin(prog * PI));
+    }
+
+    // distant islands
+    float ih = islandHeight(p.x, aspect);
+    vec3 land = pick(vec3(0.008, 0.02, 0.03), vec3(0.58, 0.64, 0.68));
+    col = mix(col, land, distantPalms(p, aspect, t));
+    if (p.y < HORIZON + ih) {
+      col = land * (0.75 + 0.25 * noise(p * 160.0));
+      glow(col, pick(vec3(0.1, 0.35, 0.4), vec3(0.85, 0.9, 0.92)), exp(-(HORIZON + ih - p.y) * 300.0) * 0.4);
+    }
+  } else if (p.y > s) {
+    // ---- sea ----------------------------------------------------------------
+    float u = clamp((p.y - s) / (HORIZON - s), 0.0, 0.999);
+    float w = -log(1.0 - u * 0.985);
+    float wx = p.x / (HORIZON - p.y + 0.03) * 0.12;
+
+    vec3 shallow = pick(vec3(0.03, 0.2, 0.27), vec3(0.6, 0.82, 0.84));
+    vec3 deep = pick(vec3(0.015, 0.07, 0.16), vec3(0.74, 0.84, 0.9));
+    vec3 far = pick(vec3(0.04, 0.22, 0.3), vec3(0.8, 0.9, 0.92));
+    col = mix(shallow, deep, smoothstep(0.0, 1.5, w));
+    col = mix(col, far, smoothstep(2.3, 4.1, w));
+
+    // horizontal brushwork
+    float stroke = fbm(vec2(p.x * 2.0 + wx * 0.2, p.y * 120.0));
+    col *= mix(0.78 + 0.4 * stroke, 1.0, uLight * 0.7);
+
+    glow(col, starReflections(sp, t), 1.0 - uLight * 0.8);
+
+    // wave fronts rolling in
+    float warp = (fbm(vec2(wx * 0.45, w * 0.3 - t * 0.02)) - 0.5) * 1.6;
+    float phase = (w + t * 0.1) * 1.75 + warp;
+    float fp = fract(phase);
+    float fw = fwidth(phase);
+    float crestId = floor(phase);
+    float strength = 0.5 + 0.5 * hash12(vec2(crestId, 2.0));
+    float broken = smoothstep(0.2, 0.62, noise(vec2(wx * 1.3, crestId * 3.7)));
+    float foamTex = 0.55 + 0.45 * noise(vec2(wx * 9.0, phase * 4.0));
+    float sharp = 1.0 - smoothstep(0.0, fw * 1.6 + 0.024, min(fp, 1.0 - fp));
+    float echo = 1.0 - smoothstep(0.0, fw * 1.2 + 0.009, abs(fp - 0.1));
+    float trailGlow = exp(-fp * 5.0);
+    float fade = smoothstep(3.9, 0.7, w);
+    vec3 crestColor = mix(
+      pick(vec3(1.0, 0.66, 0.28), vec3(0.82, 0.55, 0.26)),
+      pick(vec3(0.55, 0.95, 1.0), vec3(0.22, 0.58, 0.68)),
+      smoothstep(1.2, 3.2, w)
+    );
+    vec3 wake = mix(pick(vec3(0.7, 0.42, 0.18), vec3(0.85, 0.65, 0.4)), pick(vec3(0.1, 0.55, 0.62), vec3(0.4, 0.66, 0.78)), smoothstep(0.8, 2.6, w));
+    glow(col, wake, trailGlow * broken * fade * strength * 0.5);
+    glow(col, crestColor, (sharp * 2.3 * foamTex + echo * 0.6) * broken * fade * strength);
+
+    // glints riding the swell
+    float gs = 34.0;
+    vec2 g = p * gs;
+    vec2 gid = floor(g);
+    for (int j = -1; j <= 1; j++) {
+      for (int i = -1; i <= 1; i++) {
+        vec2 c = gid + vec2(float(i), float(j));
+        float h = hash12(c + 91.0);
+        if (h < 0.78) continue;
+        vec2 d = (g - c - hash22(c + 4.0)) / gs;
+        float size = mix(0.005, 0.017, pow(hash12(c + 13.0), 2.0)) * (1.0 - u * 0.6);
+        float tw = max(0.0, sin(t * (1.2 + h * 2.0) + h * 30.0));
+        float near = 0.15 + (sharp * 1.5 + exp(-fp * 4.0)) * broken * strength;
+        glow(col, pick(vec3(1.0, 0.84, 0.58), vec3(0.85, 0.6, 0.3)), glint(d, size, 2.4) * tw * near * fade * 0.8);
+      }
+    }
+
+    glow(col, pick(vec3(0.6, 0.95, 1.0), vec3(0.4, 0.7, 0.78)), exp(-abs(p.y - HORIZON) * 260.0) * 0.55);
+  } else {
+    // ---- sand ---------------------------------------------------------------
+    float grain = noise(frag * 0.8) * 0.4 + fbm(p * vec2(9.0, 30.0)) * 0.6;
+    float toWater = smoothstep(-0.5, s, p.y);
+    col = mix(
+      pick(vec3(0.12, 0.13, 0.19), vec3(0.9, 0.87, 0.82)),
+      pick(vec3(0.34, 0.42, 0.48), vec3(0.95, 0.93, 0.88)),
+      grain * 0.35 + toWater * toWater * 0.65
+    );
+    // ripples combed into the sand by the backwash
+    float ripples = sin((p.y - s) * 260.0 + fbm(p * vec2(6.0, 2.0)) * 9.0);
+    col *= 1.0 + ripples * 0.05 * (1.0 - uLight * 0.5);
+    // wet sand mirrors the water
+    float wet = smoothstep(0.045, 0.0, s - p.y);
+    col = mix(col, pick(vec3(0.04, 0.16, 0.22), vec3(0.76, 0.84, 0.86)), wet * 0.75);
+    glow(col, starReflections(vec2(sp.x, 2.0 * s - p.y + HORIZON - 0.02), t), wet * 0.5 * (1.0 - uLight));
+
+    // glitter
+    vec2 gg = frag / 3.0;
+    float gh = hash12(floor(gg));
+    float sparkle = step(0.975, gh) * max(0.0, sin(t * (1.0 + gh * 4.0) + gh * 50.0));
+    glow(col, pick(vec3(0.8, 0.95, 1.0), vec3(0.85, 0.7, 0.45)), sparkle * 0.7 * (0.4 + toWater));
+
+    // two small figures by the water
+    if (aspect > 0.9) {
+      float fx = aspect * 0.29;
+      vec2 feet = vec2(fx, shoreline(fx) - 0.05);
+      float h = 0.05;
+      float d = min(figure(p, feet, h, 0.03), figure(p, feet + vec2(0.024, 0.002), h * 1.08, -0.04));
+      glow(col, pick(vec3(0.35, 0.8, 0.9), vec3(0.6, 0.8, 0.85)), exp(-max(d, 0.0) * 120.0) * 0.35);
+      col = mix(col, pick(vec3(0.02, 0.03, 0.05), vec3(0.3, 0.34, 0.4)), smoothstep(AA, -AA, d));
+    }
+  }
+
+  // swash: foam where the water meets the sand
+  float swash = s + 0.007 * sin(t * 0.45 + p.x * 3.0) - 0.004;
+  float foam = exp(-abs(p.y - swash) * 280.0) * (0.5 + 0.5 * noise(vec2(p.x * 40.0, t * 0.3)));
+  glow(col, pick(vec3(0.75, 0.97, 1.0), vec3(0.4, 0.66, 0.74)), foam * 0.9);
+
+  // foreground palms frame the scene
+  float palms = foregroundPalms(p, aspect, t);
+  vec3 ink = pick(vec3(0.006, 0.01, 0.025), vec3(0.42, 0.47, 0.54));
+  ink += pick(vec3(0.01, 0.02, 0.02), vec3(0.04)) * noise(p * 40.0);
+  col = mix(col, ink, palms);
+
+  // painterly finish: soft tone curve, canvas weave, grain, vignette
+  vec3 toned = 1.0 - exp(-col * 1.35);
+  col = mix(toned, col, uLight);
+  float weave = sin(frag.x * 1.9) * sin(frag.y * 1.9);
+  float canvasTex = 0.94 + 0.04 * weave + 0.06 * noise(frag * 0.35);
+  col *= mix(canvasTex, 1.0 - (1.0 - canvasTex) * 0.6, uLight);
+  float vig = 1.0 - 0.5 * dot(p * vec2(0.5, 1.0), p * vec2(0.5, 1.0));
+  col = mix(col * vig, col, uLight);
+
+  col += (hash12(frag + fract(t) * 100.0) - 0.5) / 255.0;
+  outColor = vec4(col, 1.0);
+}`;
+
+function compile(gl: WebGL2RenderingContext, type: number, source: string) {
+  const shader = gl.createShader(type);
+  if (!shader) return null;
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    console.warn(gl.getShaderInfoLog(shader));
+    gl.deleteShader(shader);
+    return null;
+  }
+  return shader;
+}
+
+function initNightShore(canvas: HTMLCanvasElement) {
+  const gl = canvas.getContext("webgl2", {
+    alpha: false,
+    antialias: false,
+    depth: false,
     powerPreference: "low-power",
   });
+  if (!gl) return;
 
-  const segmentsX = smallViewport ? 28 : 58;
-  const segmentsY = smallViewport ? 10 : 18;
-  const geometry = new THREE.PlaneGeometry(14, 6.2, segmentsX, segmentsY);
-  const positions = geometry.attributes.position as Three.BufferAttribute;
-  const basePositions = new Float32Array(positions.array);
-  const pointer = new THREE.Vector2(0, 0);
-  const pointerTarget = new THREE.Vector2(0, 0);
-  const wire = new THREE.MeshBasicMaterial({
-    color: new THREE.Color("#bfc2cb"),
-    transparent: true,
-    opacity: 0.13,
-    wireframe: true,
-    depthWrite: false,
-  });
-  const accentA = new THREE.MeshBasicMaterial({
-    color: new THREE.Color("#655bd7"),
-    transparent: true,
-    opacity: 0.34,
-    depthWrite: false,
-  });
-  const accentB = accentA.clone();
-  const plane = new THREE.Mesh(geometry, wire);
+  const vertex = compile(gl, gl.VERTEX_SHADER, vertexSource);
+  const fragment = compile(gl, gl.FRAGMENT_SHADER, fragmentSource);
+  if (!vertex || !fragment) return;
 
-  function tinyAsteroidGeometry(index: number) {
-    const asteroid = new THREE.IcosahedronGeometry(smallViewport ? 0.032 : 0.043, 1);
-    const asteroidPositions = asteroid.attributes.position as Three.BufferAttribute;
-    const vertex = new THREE.Vector3();
-    const direction = new THREE.Vector3();
-    const seed = index * 2.371 + 0.83;
-
-    for (let vertexIndex = 0; vertexIndex < asteroidPositions.count; vertexIndex += 1) {
-      vertex.fromBufferAttribute(asteroidPositions, vertexIndex);
-      direction.copy(vertex).normalize();
-      const deformation =
-        1 +
-        Math.sin(direction.x * 6.3 + seed) * 0.13 +
-        Math.cos(direction.y * 8.7 - seed * 1.4) * 0.09 +
-        Math.sin(direction.z * 5.1 + direction.x * 4.2 + seed * 0.7) * 0.08;
-      vertex.multiplyScalar(deformation);
-      asteroidPositions.setXYZ(vertexIndex, vertex.x, vertex.y, vertex.z);
-    }
-
-    asteroidPositions.needsUpdate = true;
-    asteroid.computeVertexNormals();
-    return asteroid;
+  const program = gl.createProgram();
+  gl.attachShader(program, vertex);
+  gl.attachShader(program, fragment);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    console.warn(gl.getProgramInfoLog(program));
+    return;
   }
+  gl.useProgram(program);
+  gl.bindVertexArray(gl.createVertexArray());
 
-  const trailPointCount = 24;
-  const agents = Array.from({ length: smallViewport ? 5 : 12 }, (_, index) => {
-    const group = new THREE.Group();
-    const accent = index % 3 === 0 ? accentA : accentB;
-    const material = new THREE.MeshStandardMaterial({
-      color: index % 3 === 0 ? 0x756d68 : 0x65696f,
-      roughness: 1,
-      metalness: 0,
-      flatShading: true,
-      transparent: true,
-      depthWrite: false,
-    });
-    const trailMaterial = new THREE.LineBasicMaterial({
-      color: accent.color,
-      transparent: true,
-      opacity: smallViewport ? 0.12 : 0.18,
-      depthWrite: false,
-    });
-    const head = new THREE.Mesh(tinyAsteroidGeometry(index), material);
-    const trailPositions = new Float32Array(trailPointCount * 3);
-    const trailGeometry = new THREE.BufferGeometry();
-    const trail = new THREE.Line(trailGeometry, trailMaterial);
+  const uRes = gl.getUniformLocation(program, "uRes");
+  const uTime = gl.getUniformLocation(program, "uTime");
+  const uLight = gl.getUniformLocation(program, "uLight");
+  const uPointer = gl.getUniformLocation(program, "uPointer");
 
-    material.opacity = smallViewport ? 0.28 : 0.36;
-    head.position.z = 0.035;
-    head.scale.set(
-      0.82 + (index % 4) * 0.09,
-      0.66 + ((index + 2) % 5) * 0.075,
-      0.78 + ((index + 1) % 3) * 0.11,
-    );
-    trailGeometry.setAttribute("position", new THREE.BufferAttribute(trailPositions, 3));
-    group.add(head);
-
-    return {
-      group,
-      material,
-      trail,
-      trailGeometry,
-      trailMaterial,
-      trailPositions,
-      offset: index / (smallViewport ? 5 : 12),
-      speed: 0.01 + (index % 6) * 0.0012,
-      lane: -2.3 + (index % 6) * 0.92,
-      drift: 0.12 + (index % 4) * 0.07,
-      branch: index % 2 === 0 ? 1 : -1,
-      spin: new THREE.Vector3(
-        0.17 + (index % 4) * 0.031,
-        0.13 + ((index + 2) % 5) * 0.027,
-        0.09 + ((index + 1) % 3) * 0.022,
-      ),
-    };
-  });
-
-  /* Procedural black hole in the Interstellar style: a thin accretion disk
-     seen nearly edge-on, whose far side is lensed into an arc over the top of
-     the shadow and a fainter arc beneath it, with a razor photon ring hugging
-     the event horizon. Everything is painted in screen space on one plane.
-     Shader units: 1.0 = shadow radius. */
-  const shadowRadius = 0.62;
-  const diskWidth = 12.4;
-  const diskHeight = 4.6;
-  const blackHole = new THREE.Group();
-  const diskMaterial = new THREE.ShaderMaterial({
-    uniforms: {
-      uTime: { value: 0 },
-      uOpacity: { value: 1 },
-      uExtent: {
-        value: new THREE.Vector2(diskWidth / shadowRadius, diskHeight / shadowRadius),
-      },
-    },
-    vertexShader: `
-      varying vec2 vUvPosition;
-
-      void main() {
-        vUvPosition = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `,
-    fragmentShader: `
-      uniform float uTime;
-      uniform float uOpacity;
-      uniform vec2 uExtent;
-      varying vec2 vUvPosition;
-
-      const float TAU = 6.28318530718;
-
-      float hash(vec2 p) {
-        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
-      }
-
-      /* Value noise that wraps in y every \`period\` cells, so the azimuth
-         seam of the disk never shows. */
-      float pnoise(vec2 p, float period) {
-        vec2 i = floor(p);
-        vec2 f = fract(p);
-        f = f * f * (3.0 - 2.0 * f);
-        float y0 = mod(i.y, period);
-        float y1 = mod(i.y + 1.0, period);
-        return mix(
-          mix(hash(vec2(i.x, y0)), hash(vec2(i.x + 1.0, y0)), f.x),
-          mix(hash(vec2(i.x, y1)), hash(vec2(i.x + 1.0, y1)), f.x),
-          f.y
-        );
-      }
-
-      float fbm(vec2 p, float period) {
-        float value = 0.0;
-        float amplitude = 0.5;
-        for (int i = 0; i < 4; i++) {
-          value += amplitude * pnoise(p, period);
-          p = p * 2.0 + vec2(13.7, 0.0);
-          period *= 2.0;
-          amplitude *= 0.5;
-        }
-        return value;
-      }
-
-      /* Sheared, streaky gas in disk coordinates. Two time-offset layers are
-         cross-faded so differential rotation never tears the noise apart. */
-      float gas(float rho, float phi) {
-        float cycle = 36.0;
-        float omega = 0.11 / pow(rho, 1.5);
-        float t1 = mod(uTime, cycle);
-        float t2 = mod(uTime + cycle * 0.5, cycle);
-        float w2 = abs(t1 / cycle * 2.0 - 1.0);
-        float phiN = phi / TAU;
-        vec2 coarse1 = vec2(rho * 2.8, (phiN - omega * t1 / TAU) * 5.0);
-        vec2 coarse2 = vec2(rho * 2.8 + 2.7, (phiN - omega * t2 / TAU) * 5.0 + 1.3);
-        vec2 fine1 = vec2(rho * 8.0, (phiN - omega * t1 / TAU) * 7.0);
-        vec2 fine2 = vec2(rho * 8.0 + 1.9, (phiN - omega * t2 / TAU) * 7.0 + 0.7);
-        float coarse = mix(fbm(coarse1, 5.0), fbm(coarse2, 5.0), w2);
-        float fine = mix(fbm(fine1, 7.0), fbm(fine2, 7.0), w2);
-        /* Soft cloud clumps with drifting wisps, no hard streak lines. */
-        float clouds = smoothstep(0.22, 0.78, coarse * 0.68 + fine * 0.32);
-        return 0.3 + clouds * 0.95;
-      }
-
-      vec3 diskColor(float rho, float tex) {
-        vec3 cream = vec3(1.0, 0.9, 0.76);
-        vec3 peach = vec3(0.96, 0.72, 0.5);
-        vec3 tan = vec3(0.72, 0.5, 0.34);
-        vec3 dust = vec3(0.4, 0.3, 0.24);
-        float h = clamp((rho - 1.05) / 6.0, 0.0, 1.0);
-        vec3 color = mix(cream, peach, smoothstep(0.0, 0.2, h));
-        color = mix(color, tan, smoothstep(0.15, 0.5, h));
-        color = mix(color, dust, smoothstep(0.45, 1.0, h));
-        return mix(color * vec3(0.62, 0.48, 0.42), color, clamp(tex, 0.0, 1.0));
-      }
-
-      /* Disk radiance at disk radius rho: rgb plus a scalar weight used for
-         occlusion. The innermost gas burns white; the body cools outward. */
-      vec4 shade(float rho, float tex, float innerEdge) {
-        float inner = smoothstep(innerEdge - 0.1, innerEdge + 0.16, rho);
-        float outer = 1.0 - smoothstep(4.5, 8.0, rho);
-        float body = 1.4 * pow(1.12 / max(rho, 1.12), 1.15);
-        float hot = exp(-(rho - 1.0) / 0.55) * 1.7;
-        float gain = inner * outer * (0.45 + tex * 0.8);
-        vec3 color = diskColor(rho, tex) * body + vec3(1.0, 0.97, 0.92) * hot * (0.75 + tex * 0.35);
-        return vec4(color * gain, (body + hot) * gain);
-      }
-
-      void main() {
-        vec2 p = (vUvPosition - 0.5) * uExtent;
-        float r = length(p);
-
-        /* Foreshortening of the disk plane. Lensing lifts the far side over
-           the top of the shadow and folds a second image beneath it. */
-        float perspective = 1.0 + 0.35 * smoothstep(-8.0, 8.0, p.x);
-        float eps = 0.12 * perspective;
-        float epsNear = 0.22 * perspective;
-        float epsUp = eps + 0.88 * exp(-(r - 1.0) / 0.8);
-        float epsDown = eps + 0.88 * exp(-(r - 1.0) / 0.9);
-        float outside = smoothstep(0.985, 1.02, r);
-
-        float upperHalf = smoothstep(-0.1, 0.1, p.y);
-        float lowerHalf = 1.0 - upperHalf;
-
-        /* Far side of the disk, lensed into the arch above. */
-        float rhoUp = sqrt(p.x * p.x + (p.y / epsUp) * (p.y / epsUp));
-        float phiUp = atan(p.y / epsUp, p.x);
-        float texUp = gas(rhoUp, phiUp);
-        vec3 far = shade(rhoUp, texUp, 1.0).rgb * outside * upperHalf;
-
-        /* Near side of the disk, passing in front of the lower shadow. In
-           front of the shadow it sits a little lower and darker, as the
-           optically thick band does in the film. */
-        float inFront = 1.0 - smoothstep(0.8, 1.7, abs(p.x));
-        float yNear = p.y + 0.16 * inFront;
-        float rhoNear = sqrt(p.x * p.x + (yNear / epsNear) * (yNear / epsNear));
-        float phiNear = atan(yNear / epsNear, p.x);
-        float texNear = gas(rhoNear, phiNear);
-        vec4 nearShade = shade(rhoNear, texNear, 1.0);
-        float silhouette = mix(0.45, 1.0, 1.0 - inFront);
-        vec3 near = nearShade.rgb * lowerHalf * silhouette;
-        near = mix(near * vec3(0.9, 0.6, 0.48), near, silhouette);
-        float nearAlpha = clamp(nearShade.a * lowerHalf * 1.6, 0.0, 1.0);
-
-        /* Secondary image of the disk, wrapped under the shadow. */
-        float rhoDown = sqrt(p.x * p.x + (p.y / epsDown) * (p.y / epsDown));
-        float phiDown = atan(p.y / epsDown, p.x);
-        float texDown = gas(rhoDown, phiDown);
-        vec3 under = shade(rhoDown, texDown, 1.0).rgb * outside * lowerHalf;
-        under *= 0.85 * smoothstep(-0.12, -0.7, p.y);
-
-        /* Vertical thickness: diffuse gas above and below the disk plane, so
-           the band has fuzzy edges instead of a cut line. */
-        float rhoMid = max(abs(p.x), 1.0);
-        float texMid = gas(rhoMid, atan(0.0, p.x));
-        vec4 midShade = shade(rhoMid, texMid, 1.0);
-        float thickness = 0.24 + 0.07 * abs(p.x);
-        float puff = exp(-pow(p.y / thickness, 2.0)) * (0.5 + texMid * 0.6) * 0.42;
-        vec3 haze = midShade.rgb * puff * outside;
-
-        /* Scattered light: a broad warm halo around the whole system. */
-        vec3 halo = vec3(0.9, 0.72, 0.56) * exp(-(r - 1.0) / 1.1) * 0.12 * outside;
-        halo *= 1.0 - smoothstep(2.2, 4.5, r);
-
-        /* Relativistic beaming: the approaching (left) side burns whiter. */
-        float beam = mix(1.28, 0.84, smoothstep(-6.0, 6.0, p.x));
-        vec3 beamTint = mix(vec3(1.0, 1.0, 1.04), vec3(1.0, 0.86, 0.72), smoothstep(-4.0, 4.0, p.x));
-
-        /* Photon ring: a thin white edge hugging the shadow, with a soft rim. */
-        float ring = exp(-pow((r - 1.0) / 0.011, 2.0)) * (0.35 + texUp * 0.9) * beam;
-        float rim = exp(-pow((r - 1.03) / 0.08, 2.0)) * 0.12 * outside;
-
-        float occlusion = 1.0 - nearAlpha * 0.88;
-        vec3 color = (far + under + haze + halo) * beam * beamTint * occlusion;
-        color += near * beam * beamTint;
-        color += vec3(1.0, 0.98, 0.95) * (ring * 1.1 + rim) * occlusion;
-
-        /* Never let the plane's own rectangle show. */
-        vec2 edge = smoothstep(vec2(0.0), vec2(0.06, 0.12), vUvPosition)
-          * smoothstep(vec2(1.0), vec2(0.94, 0.88), vUvPosition);
-        color *= edge.x * edge.y;
-
-        color *= uOpacity;
-        float intensity = max(max(color.r, color.g), color.b);
-        if (intensity < 0.004) discard;
-        /* Alpha follows the light so faint regions leave the page background
-           showing through instead of turning the canvas opaque black. */
-        gl_FragColor = vec4(color, clamp(intensity * 1.4, 0.0, 1.0));
-      }
-    `,
-    transparent: true,
-    depthWrite: false,
-    depthTest: false,
-    side: THREE.DoubleSide,
-    blending: THREE.CustomBlending,
-    blendEquation: THREE.AddEquation,
-    blendSrc: THREE.OneFactor,
-    blendDst: THREE.OneFactor,
-    blendSrcAlpha: THREE.OneFactor,
-    blendDstAlpha: THREE.OneFactor,
-  });
-  const disk = new THREE.Mesh(
-    new THREE.PlaneGeometry(diskWidth, diskHeight),
-    diskMaterial,
-  );
-  disk.rotation.z = -0.09;
-  disk.renderOrder = 2;
-
-  /* The shadow is a flat black disc painted beneath the emissive field. */
-  const shadowMaterial = new THREE.ShaderMaterial({
-    uniforms: { uOpacity: { value: 1 } },
-    vertexShader: `
-      varying vec2 vUvPosition;
-
-      void main() {
-        vUvPosition = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `,
-    fragmentShader: `
-      uniform float uOpacity;
-      varying vec2 vUvPosition;
-
-      void main() {
-        float r = length(vUvPosition - 0.5) * 2.0;
-        float alpha = 1.0 - smoothstep(0.985, 1.005, r);
-        if (alpha < 0.002) discard;
-        gl_FragColor = vec4(0.0, 0.0, 0.0, alpha * uOpacity);
-      }
-    `,
-    transparent: true,
-    depthWrite: false,
-    depthTest: false,
-  });
-  const eventHorizon = new THREE.Mesh(
-    new THREE.PlaneGeometry(shadowRadius * 2, shadowRadius * 2),
-    shadowMaterial,
-  );
-  eventHorizon.renderOrder = 1;
-  blackHole.add(eventHorizon, disk);
-
-  /* Deep star field: stars are scattered through a long depth range behind
-     the scene, so distance shows in size, brightness, and parallax. Each
-     star carries its own color temperature and twinkle phase. */
-  const cameraZ = 8.5;
-  const starCount = smallViewport ? 500 : 1400;
-  const starPositions = new Float32Array(starCount * 3);
-  const baseStarPositions = new Float32Array(starCount * 3);
-  const starSizes = new Float32Array(starCount);
-  const starPhases = new Float32Array(starCount);
-  const starColors = new Float32Array(starCount * 3);
-  for (let index = 0; index < starCount; index += 1) {
-    const depthRoll = Math.random();
-    /* Distance from the camera, biased toward the far layers. */
-    const distance = 12 + Math.pow(depthRoll, 0.65) * 30;
-    const spreadY = distance * 0.4;
-    const spreadX = spreadY * 2.6;
-    baseStarPositions[index * 3] = (Math.random() - 0.5) * spreadX;
-    baseStarPositions[index * 3 + 1] = (Math.random() - 0.5) * spreadY;
-    baseStarPositions[index * 3 + 2] = cameraZ - distance;
-
-    const magnitude = Math.random();
-    starSizes[index] = 1.3 + Math.pow(magnitude, 5.5) * 6.0;
-    starPhases[index] = Math.random() * Math.PI * 2;
-
-    const temperature = Math.random();
-    let red = 0.82;
-    let green = 0.88;
-    let blue = 1;
-    if (temperature > 0.9) {
-      red = 1;
-      green = 0.78;
-      blue = 0.58;
-    } else if (temperature > 0.62) {
-      red = 1;
-      green = 0.95;
-      blue = 0.86;
-    } else if (temperature > 0.3) {
-      red = 0.94;
-      green = 0.96;
-      blue = 1;
-    }
-    starColors[index * 3] = red;
-    starColors[index * 3 + 1] = green;
-    starColors[index * 3 + 2] = blue;
-  }
-  starPositions.set(baseStarPositions);
-  const starGeometry = new THREE.BufferGeometry();
-  starGeometry.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
-  starGeometry.setAttribute("aSize", new THREE.BufferAttribute(starSizes, 1));
-  starGeometry.setAttribute("aPhase", new THREE.BufferAttribute(starPhases, 1));
-  starGeometry.setAttribute("aColor", new THREE.BufferAttribute(starColors, 3));
-  const starMaterial = new THREE.ShaderMaterial({
-    uniforms: {
-      uTime: { value: 0 },
-      uOpacity: { value: 1 },
-      uPixelRatio: { value: 1 },
-      uLightMode: { value: 0 },
-    },
-    vertexShader: `
-      uniform float uTime;
-      uniform float uPixelRatio;
-      attribute float aSize;
-      attribute float aPhase;
-      attribute vec3 aColor;
-      varying vec3 vColor;
-      varying float vGlow;
-
-      void main() {
-        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-        float distance = -mvPosition.z;
-        float twinkle = 0.78 + 0.22 * sin(uTime * (0.6 + aPhase * 0.25) + aPhase * 7.0);
-        float attenuation = 22.0 / distance;
-        vColor = aColor;
-        vGlow = twinkle * clamp(attenuation, 0.5, 1.7) * (0.55 + aSize * 0.14);
-        gl_PointSize = max(aSize * attenuation * uPixelRatio, 1.0);
-        gl_Position = projectionMatrix * mvPosition;
-      }
-    `,
-    fragmentShader: `
-      uniform float uOpacity;
-      uniform float uLightMode;
-      varying vec3 vColor;
-      varying float vGlow;
-
-      void main() {
-        float d = length(gl_PointCoord - 0.5) * 2.0;
-        float core = exp(-d * d * 7.0);
-        float halo = exp(-d * 3.2) * 0.32;
-        float intensity = (core + halo) * vGlow;
-        if (intensity < 0.008) discard;
-        vec3 color = mix(vColor, vec3(0.28, 0.31, 0.38), uLightMode);
-        gl_FragColor = vec4(color * intensity * uOpacity, intensity * uOpacity);
-      }
-    `,
-    transparent: true,
-    depthWrite: false,
-    depthTest: false,
-    blending: THREE.AdditiveBlending,
-  });
-  const stars = new THREE.Points(starGeometry, starMaterial);
-  stars.renderOrder = -1;
-
-  /* Faint interstellar haze far behind everything, for the sense of a
-     volume rather than a backdrop. */
-  const nebulaDistance = 44;
-  const nebulaMaterial = new THREE.ShaderMaterial({
-    uniforms: {
-      uTime: { value: 0 },
-      uOpacity: { value: 1 },
-    },
-    vertexShader: `
-      varying vec2 vUvPosition;
-
-      void main() {
-        vUvPosition = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `,
-    fragmentShader: `
-      uniform float uTime;
-      uniform float uOpacity;
-      varying vec2 vUvPosition;
-
-      float hash(vec2 p) {
-        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
-      }
-
-      float noise(vec2 p) {
-        vec2 i = floor(p);
-        vec2 f = fract(p);
-        f = f * f * (3.0 - 2.0 * f);
-        return mix(
-          mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),
-          mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x),
-          f.y
-        );
-      }
-
-      float fbm(vec2 p) {
-        float value = 0.0;
-        float amplitude = 0.5;
-        for (int i = 0; i < 5; i++) {
-          value += amplitude * noise(p);
-          p = p * 2.07 + vec2(31.3, 17.1);
-          amplitude *= 0.5;
-        }
-        return value;
-      }
-
-      void main() {
-        vec2 p = (vUvPosition - 0.5) * vec2(2.6, 1.0) * 3.2;
-        float drift = uTime * 0.006;
-        float warp = fbm(p * 0.7 + vec2(drift, -drift * 0.6));
-        float cloud = fbm(p * 1.3 + vec2(warp * 1.6, warp * 0.9) + vec2(-drift * 0.5, drift));
-        float wisps = fbm(p * 3.1 - vec2(warp * 2.2, drift));
-        float density = smoothstep(0.34, 0.78, cloud) * (0.55 + wisps * 0.8);
-        float edge = 1.0 - smoothstep(0.55, 1.0, length((vUvPosition - 0.5) * vec2(1.6, 2.0)));
-        vec3 cold = vec3(0.3, 0.38, 0.55);
-        vec3 warm = vec3(0.5, 0.36, 0.3);
-        vec3 color = mix(cold, warm, smoothstep(0.35, 0.75, wisps));
-        float alpha = density * edge * 0.5 * uOpacity;
-        if (alpha < 0.002) discard;
-        gl_FragColor = vec4(color * alpha, alpha);
-      }
-    `,
-    transparent: true,
-    depthWrite: false,
-    depthTest: false,
-    blending: THREE.AdditiveBlending,
-  });
-  const nebula = new THREE.Mesh(
-    new THREE.PlaneGeometry(nebulaDistance * 1.4 * 2.6, nebulaDistance * 1.4),
-    nebulaMaterial,
-  );
-  nebula.position.z = cameraZ - nebulaDistance;
-  nebula.renderOrder = -2;
-  let width = 1;
-  let height = 1;
+  const root = document.documentElement;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const smallViewport = window.matchMedia("(max-width: 640px)").matches;
+  const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
+  let width = 0;
   let animationFrame = 0;
-  const gravityCenterLocal = new THREE.Vector3();
-  const gravityCenterWorld = new THREE.Vector3();
-  const gravityPoint = new THREE.Vector3();
-  const asteroidKeyLight = new THREE.DirectionalLight(0xffe2b5, 1.65);
-  const asteroidFillLight = new THREE.HemisphereLight(0xaab9d0, 0x17191e, 0.72);
-
-  camera.position.set(0, 0, cameraZ);
-  asteroidKeyLight.position.set(-3.5, 4.5, 6);
-  field.position.set(1.3, -0.15, -1.5);
-  field.rotation.set(-0.42, 0.2, -0.08);
-  field.add(plane, ...agents.flatMap((agent) => [agent.trail, agent.group]));
-  scene.add(nebula, stars, field, blackHole, asteroidKeyLight, asteroidFillLight);
-
-  function cssColor(name: string, fallback: string) {
-    return getComputedStyle(root).getPropertyValue(name).trim() || fallback;
-  }
-
-  /* The wrapper used to be dimmed with CSS opacity in dark mode. That cap is
-     gone so the disk can reach white, and the ambient layers carry the
-     same dimming here instead. */
-  function ambientLevel() {
-    const dark = root.dataset.theme === "dark";
-    return dark ? (smallViewport ? 0.48 : 0.56) : 1;
-  }
 
   function syncTheme() {
-    const dark = root.dataset.theme === "dark";
-    const ambient = ambientLevel();
-
-    blackHole.visible = dark;
-    wire.color.set(cssColor("--line-strong", dark ? "#444240" : "#bfc1c4"));
-    wire.opacity = (dark ? 0.22 : 0.14) * ambient;
-    accentA.color.set(cssColor("--signal-accent-1", dark ? "#73a8d8" : "#2f6f9f"));
-    accentB.color.set(cssColor("--signal-accent-2", dark ? "#a9c9e6" : "#7fa6c4"));
-    accentA.opacity = (dark ? 0.42 : 0.32) * ambient;
-    accentB.opacity = (dark ? 0.34 : 0.25) * ambient;
-    diskMaterial.uniforms.uOpacity.value = dark ? 0.6 : 0.4;
-    shadowMaterial.uniforms.uOpacity.value = dark ? 1 : 0.94;
-    starMaterial.uniforms.uOpacity.value = dark ? (smallViewport ? 0.45 : 0.55) : 0.14;
-    starMaterial.uniforms.uLightMode.value = dark ? 0 : 1;
-    starMaterial.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending;
-    starMaterial.needsUpdate = true;
-    nebula.visible = dark;
-    nebulaMaterial.uniforms.uOpacity.value = smallViewport ? 0.4 : 0.55;
-    asteroidKeyLight.intensity = dark ? 1.65 : 1.15;
-    asteroidFillLight.intensity = dark ? 0.72 : 1.05;
-
-    for (const [index, agent] of agents.entries()) {
-      const accentColor = index % 3 === 0 ? accentA.color : accentB.color;
-      agent.material.color.set(
-        index % 3 === 0
-          ? dark ? "#82766b" : "#655d56"
-          : dark ? "#69717a" : "#515860",
-      );
-      agent.trailMaterial.color.copy(accentColor);
-    }
+    gl!.uniform1f(uLight, root.dataset.theme === "dark" ? 0 : 1);
   }
 
   function resize() {
     const nextWidth = window.innerWidth;
-    const nextHeight = window.innerHeight;
-
-    /* Mobile browser chrome changes innerHeight while scrolling. Rebuilding the
-       camera for that height-only change makes the fixed black hole drift. */
+    /* Mobile browser chrome changes innerHeight while scrolling; resizing for
+       that height-only change makes the horizon jump. */
     if (smallViewport && width > 1 && Math.abs(nextWidth - width) < 2) return;
-
     width = nextWidth;
-    height = nextHeight;
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    const blackHoleScale = smallViewport ? 0.5 : Math.min(0.84, 0.66 + width / 7200);
-    blackHole.scale.setScalar(blackHoleScale);
-    blackHole.position.set(
-      smallViewport ? 1.35 : Math.min(3.75, camera.aspect * 2.35),
-      smallViewport ? 1.58 : 0.72,
-      -0.45,
-    );
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, smallViewport ? 1.25 : 1.6));
-    starMaterial.uniforms.uPixelRatio.value = renderer.getPixelRatio();
-    renderer.setSize(width, height, false);
-  }
 
-  function gravityInfluence(distance: number, horizon: number, capture: number) {
-    const value = 1 - Math.max(0, Math.min(1, (distance - horizon) / (capture - horizon)));
-    return value * value * (3 - 2 * value);
-  }
-
-  function orbitAroundGravity(
-    point: Three.Vector3,
-    center: Three.Vector3,
-    time: number,
-    seed: number,
-    capture: number,
-    horizon: number,
-  ) {
-    const dx = point.x - center.x;
-    const dy = point.y - center.y;
-    const distance = Math.hypot(dx, dy);
-    if (distance >= capture) return point;
-
-    const influence = gravityInfluence(distance, horizon, capture);
-    const angle =
-      Math.atan2(dy, dx) +
-      influence * (0.24 + time * (0.16 + (Math.abs(seed) % 5) * 0.012));
-    const orbitRadius = Math.max(horizon, distance * (1 - influence * 0.13));
-
-    point.x = center.x + Math.cos(angle) * orbitRadius;
-    point.y = center.y + Math.sin(angle) * orbitRadius;
-    point.z += influence * 0.08;
-    return point;
-  }
-
-  function shape(time: number, gravityCenter: Three.Vector3) {
-    for (let i = 0; i < positions.count; i += 1) {
-      const x = basePositions[i * 3];
-      const y = basePositions[i * 3 + 1];
-      const dx = x - gravityCenter.x;
-      const dy = y - gravityCenter.y;
-      const distance = Math.hypot(dx, dy);
-      const influence = gravityInfluence(distance, 0.72, 3.05);
-      const radialPull = 1 - influence * 0.075;
-      const warpedX = gravityCenter.x + dx * radialPull;
-      const warpedY = gravityCenter.y + dy * radialPull;
-      const z =
-        Math.sin(x * 0.9 + time * 0.42) * 0.28 +
-        Math.cos(y * 1.7 - time * 0.26) * 0.16 +
-        Math.sin((x + y) * 0.55 + time * 0.18) * 0.12 -
-        influence * 0.7;
-
-      positions.setXYZ(i, warpedX, warpedY, z);
+    const rect = canvas.getBoundingClientRect();
+    // keep the per-frame pixel count modest on large, dense screens
+    let ratio = Math.min(window.devicePixelRatio || 1, smallViewport ? 1.5 : 1.35);
+    const budget = 2_600_000;
+    if (rect.width * rect.height * ratio * ratio > budget) {
+      ratio = Math.sqrt(budget / (rect.width * rect.height));
     }
-
-    positions.needsUpdate = true;
-    geometry.computeBoundingSphere();
+    canvas.width = Math.max(1, Math.round(rect.width * ratio));
+    canvas.height = Math.max(1, Math.round(rect.height * ratio));
+    gl!.viewport(0, 0, canvas.width, canvas.height);
+    gl!.uniform2f(uRes, canvas.width, canvas.height);
+    if (reducedMotion.matches) draw(0);
   }
 
-  function agentPosition(
-    phase: number,
-    lane: number,
-    drift: number,
-    time: number,
-  ) {
-    const x = (phase % 1) * 14 - 7;
-    const y =
-      lane +
-      Math.sin(phase * Math.PI * 2 + lane) * drift +
-      Math.sin(phase * Math.PI * 6 + time * 0.34) * drift * 0.38;
-    const z =
-      Math.sin(x * 0.9 + time * 0.42) * 0.28 +
-      Math.cos(y * 1.7 - time * 0.26) * 0.16;
-
-    return new THREE.Vector3(x, y, z);
+  function draw(now: number) {
+    pointer.x += (pointer.tx - pointer.x) * 0.04;
+    pointer.y += (pointer.ty - pointer.y) * 0.04;
+    gl!.uniform1f(uTime, reducedMotion.matches ? 21 : now * 0.001);
+    gl!.uniform2f(uPointer, pointer.x, pointer.y);
+    gl!.drawArrays(gl!.TRIANGLES, 0, 3);
   }
 
-  function placeAgents(time: number) {
-    const dark = root.dataset.theme === "dark";
-    const ambient = ambientLevel();
-    for (const agent of agents) {
-      const phase = (agent.offset + time * agent.speed) % 1;
-      const current = agentPosition(
-        phase,
-        agent.lane,
-        agent.drift,
-        time,
-      );
-
-      agent.group.position.copy(current);
-      agent.group.rotation.set(
-        time * agent.spin.x + agent.offset * Math.PI * 2,
-        time * agent.spin.y + agent.offset * Math.PI * 1.3,
-        time * agent.spin.z + agent.offset * Math.PI * 0.7,
-      );
-      const pointOpacity = dark
-        ? smallViewport ? 0.58 : 0.68
-        : smallViewport ? 0.48 : 0.6;
-      const trailOpacity = dark
-        ? smallViewport ? 0.13 : 0.16
-        : smallViewport ? 0.1 : 0.14;
-      agent.material.opacity =
-        (pointOpacity + Math.sin(time * 1.8 + agent.offset * 12) * 0.045) * ambient;
-      agent.trailMaterial.opacity =
-        (trailOpacity + Math.sin(time * 1.2 + agent.offset * 9) * 0.025) * ambient;
-
-      for (let i = 0; i < trailPointCount; i += 1) {
-        const branchShift = i > trailPointCount * 0.56 ? agent.branch * 0.015 * (i - trailPointCount * 0.56) : 0;
-        const point = agentPosition(
-          (phase - i * 0.0042 + branchShift + 1) % 1,
-          agent.lane,
-          agent.drift,
-          time,
-        );
-        const fade = 1 - i / trailPointCount;
-
-        agent.trailPositions[i * 3] = point.x;
-        agent.trailPositions[i * 3 + 1] = point.y;
-        agent.trailPositions[i * 3 + 2] = point.z + fade * 0.035;
-      }
-
-      const trailAttribute = agent.trailGeometry.attributes.position as Three.BufferAttribute;
-      trailAttribute.needsUpdate = true;
-    }
-  }
-
-  function placeStars(time: number) {
-    const starAttribute = starGeometry.attributes.position as Three.BufferAttribute;
-    const blackHoleScale = blackHole.scale.x;
-    blackHole.getWorldPosition(gravityCenterWorld);
-    const holeDistance = cameraZ - gravityCenterWorld.z;
-
-    for (let index = 0; index < starCount; index += 1) {
-      const z = baseStarPositions[index * 3 + 2];
-      const distance = cameraZ - z;
-      /* Parallax: the pointer shifts near layers more than far ones. */
-      const nearness = Math.max(0, Math.min(1, 1 - (distance - 12) / 30));
-      const parallax = 0.55 * nearness * nearness;
-      gravityPoint.set(
-        baseStarPositions[index * 3] + pointer.x * parallax * 1.6,
-        baseStarPositions[index * 3 + 1] + pointer.y * parallax,
-        z,
-      );
-      /* Lens in screen space: project the hole onto this star's depth. */
-      const depthRatio = distance / holeDistance;
-      gravityCenterLocal.set(
-        gravityCenterWorld.x * depthRatio,
-        gravityCenterWorld.y * depthRatio,
-        z,
-      );
-      orbitAroundGravity(
-        gravityPoint,
-        gravityCenterLocal,
-        time,
-        index * 0.37,
-        3.15 * blackHoleScale * depthRatio,
-        0.76 * blackHoleScale * depthRatio,
-      );
-      starAttribute.setXYZ(index, gravityPoint.x, gravityPoint.y, z);
-    }
-
-    starAttribute.needsUpdate = true;
-  }
-
-  function render(now = 0) {
-    const time = reducedMotion.matches ? 0 : now * 0.001;
-
-    pointer.lerp(pointerTarget, 0.035);
-    field.rotation.x = -0.42 + pointer.y * 0.08;
-    field.rotation.y = 0.2 + pointer.x * 0.14;
-    field.rotation.z = -0.08 + pointer.x * 0.025;
-    scene.updateMatrixWorld(true);
-    blackHole.getWorldPosition(gravityCenterLocal);
-    field.worldToLocal(gravityCenterLocal);
-    shape(time, gravityCenterLocal);
-    diskMaterial.uniforms.uTime.value = time;
-    starMaterial.uniforms.uTime.value = time;
-    nebulaMaterial.uniforms.uTime.value = time;
-
-    placeStars(time);
-    placeAgents(time);
-    renderer.render(scene, camera);
-
-    if (!reducedMotion.matches) {
-      animationFrame = requestAnimationFrame(render);
-    }
+  function loop(now: number) {
+    draw(now);
+    animationFrame = requestAnimationFrame(loop);
   }
 
   function restart() {
     cancelAnimationFrame(animationFrame);
-    if (reducedMotion.matches) {
-      render(0);
-      return;
-    }
-    animationFrame = requestAnimationFrame(render);
+    if (reducedMotion.matches) draw(0);
+    else animationFrame = requestAnimationFrame(loop);
   }
 
   window.addEventListener(
     "pointermove",
     (event) => {
       if (event.pointerType === "touch") return;
-      pointerTarget.x = (event.clientX / width - 0.5) * 2;
-      pointerTarget.y = (event.clientY / height - 0.5) * -2;
+      pointer.tx = (event.clientX / window.innerWidth - 0.5) * 2;
+      pointer.ty = (event.clientY / window.innerHeight - 0.5) * -2;
     },
     { passive: true },
   );
   window.addEventListener("resize", resize, { passive: true });
   reducedMotion.addEventListener("change", restart);
-
-  new MutationObserver(syncTheme).observe(root, {
-    attributes: true,
-    attributeFilter: ["data-theme"],
-  });
+  new MutationObserver(() => {
+    syncTheme();
+    if (reducedMotion.matches) draw(0);
+  }).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
 
   syncTheme();
   resize();
   restart();
 }
+
+if (canvas) initNightShore(canvas);

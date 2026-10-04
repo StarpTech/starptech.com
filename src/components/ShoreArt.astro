@@ -1,0 +1,33 @@
+---
+/* The homepage painting: a tall night-shore canvas that dissolves into the
+   page. The walker in each painting is a quiet door to the other one. */
+const arts = {
+  one: "/art/shore-1.webp",
+  two: "/art/shore-2.webp",
+};
+---
+
+<div class="shore-art" aria-hidden="true" data-shore-art data-art="2">
+  <div class="shore-art__frame">
+    <img
+      class="shore-art__img"
+      src={arts.two}
+      data-src-one={arts.one}
+      data-src-two={arts.two}
+      data-art="2"
+      width="1000"
+      height="2000"
+      alt=""
+      decoding="async"
+      fetchpriority="high"
+    />
+    <img class="shore-art__img shore-art__next" width="1000" height="2000" alt="" decoding="async" />
+    <canvas class="shore-art__light"></canvas>
+  </div>
+</div>
+
+<button class="shore-gem" type="button" aria-label="Step into the other painting" data-shore-gem hidden></button>
+
+<script>
+  import "../scripts/shore-art.client.ts";
+</script>

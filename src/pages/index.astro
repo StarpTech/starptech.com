@@ -1,13 +1,15 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Masthead from "../components/Masthead.astro";
+import ShoreArt from "../components/ShoreArt.astro";
 
 const pageTitle = "Dustin Deus — Engineer and Founder";
 const pageDescription =
     "Dustin Deus is an engineer and founder building companies, engineering teams, and software systems. Now at Leverage Computer.";
 ---
 
-<Layout pageTitle={pageTitle} description={pageDescription} signalField spotlight={false}>
+<Layout pageTitle={pageTitle} description={pageDescription} spotlight={false}>
+    <ShoreArt />
     <main class="page page--home" id="content">
         <Masthead active="home" />
 

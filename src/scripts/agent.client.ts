@@ -1,36 +1,9 @@
 /**
- * Minimal client script — only theme toggle.
+ * Minimal client script — console signature and "Copy as Markdown".
  */
-
-function currentTheme(): "dark" | "light" {
-  return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
-}
-
-function syncLabel() {
-  const button = document.getElementById("themeToggle");
-  if (!button) return;
-  const next = currentTheme() === "dark" ? "light" : "dark";
-  button.setAttribute("aria-label", `Switch to ${next} mode`);
-}
-
-function setTheme(next: "dark" | "light") {
-  document.documentElement.dataset.theme = next;
-  document
-    .getElementById("themeColor")
-    ?.setAttribute("content", next === "dark" ? "#161514" : "#f7f7f5");
-  try {
-    localStorage.setItem("theme", next);
-  } catch {}
-  syncLabel();
-}
-
-function toggleTheme() {
-  setTheme(currentTheme() === "dark" ? "light" : "dark");
-}
 
 /* -- console signature for devtools openers ------------------------------- */
 function consoleSignature() {
-  // pull live theme colors so the message matches dark/light
   const root = getComputedStyle(document.documentElement);
   const accent = root.getPropertyValue("--accent").trim() || "#2f6f9f";
   const muted = root.getPropertyValue("--muted").trim() || "#737373";
@@ -80,8 +53,6 @@ function initCopyMarkdown() {
 }
 
 function init() {
-  syncLabel();
-  document.getElementById("themeToggle")?.addEventListener("click", toggleTheme);
   initCopyMarkdown();
   consoleSignature();
 }

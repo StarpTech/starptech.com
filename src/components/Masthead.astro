@@ -11,8 +11,11 @@ const { active = "home" } = Astro.props;
 // Hide the "writing" link entirely when no posts are published.
 // Drafts are filtered out at build, so this naturally collapses while
 // the blog is empty, and reappears the moment a post ships.
-const published = (await getCollection("blog")).filter((p) => !p.data.draft);
+const published = (await getCollection("blog"))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 const hasWriting = published.length > 0;
+const latest = published.slice(0, 3);
 ---
 
 <header class="masthead">
@@ -32,4 +35,92 @@ const hasWriting = published.length > 0;
     )}
   </div>
   <span class="masthead__role">founder &amp; engineer · building leverage</span>
+
+  <button
+    class="menu-button"
+    type="button"
+    aria-expanded="false"
+    aria-controls="site-menu"
+    aria-label="Open menu"
+    data-menu-open
+  >
+    <span aria-hidden="true"></span>
+    <span aria-hidden="true"></span>
+  </button>
 </header>
+
+<div class="site-menu" id="site-menu" hidden data-menu>
+  <div class="site-menu__backdrop" data-menu-close></div>
+  <nav class="site-menu__panel" aria-label="Menu" tabindex="-1">
+    <div class="site-menu__top">
+      <span class="site-menu__role">founder &amp; engineer</span>
+      <button class="site-menu__close" type="button" aria-label="Close menu" data-menu-close>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+      </button>
+    </div>
+
+    <ul class="site-menu__primary" role="list">
+      <li><a href="/" aria-current={active === "home" ? "page" : undefined}>Home</a></li>
+      {hasWriting && (
+        <li><a href="/blog" aria-current={active === "writing" ? "page" : undefined}>Writing</a></li>
+      )}
+    </ul>
+
+    {latest.length > 0 && (
+      <section class="site-menu__section">
+        <h2>Latest notes</h2>
+        <ul role="list">
+          {latest.map((post) => (
+            <li><a href={`/blog/${post.slug}/`}>{post.data.title}</a></li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <section class="site-menu__section">
+      <h2>Elsewhere</h2>
+      <ul role="list">
+        <li><a href="https://github.com/StarpTech" target="_blank" rel="noreferrer">GitHub ↗</a></li>
+        <li><a href="https://www.linkedin.com/in/dustin-deus/" target="_blank" rel="noreferrer">LinkedIn ↗</a></li>
+        <li><a href="mailto:deusdustin@gmail.com">Email</a></li>
+        <li><a href="https://leverage.computer/careers/" target="_blank" rel="noreferrer">We're hiring ↗</a></li>
+      </ul>
+    </section>
+  </nav>
+</div>
+
+<script>
+  const menu = document.querySelector<HTMLElement>("[data-menu]");
+  const opener = document.querySelector<HTMLButtonElement>("[data-menu-open]");
+
+  if (menu && opener) {
+    const panel = menu.querySelector<HTMLElement>(".site-menu__panel")!;
+
+    const close = () => {
+      if (menu.hidden) return;
+      menu.classList.remove("is-open");
+      opener.setAttribute("aria-expanded", "false");
+      document.documentElement.classList.remove("menu-open");
+      window.setTimeout(() => (menu.hidden = true), 220);
+      opener.focus();
+    };
+
+    const open = () => {
+      menu.hidden = false;
+      opener.setAttribute("aria-expanded", "true");
+      document.documentElement.classList.add("menu-open");
+      requestAnimationFrame(() => {
+        menu.classList.add("is-open");
+        panel.focus({ preventScroll: true });
+      });
+    };
+
+    opener.addEventListener("click", open);
+    menu.querySelectorAll("[data-menu-close]").forEach((el) => el.addEventListener("click", close));
+    menu.querySelectorAll("a").forEach((link) => link.addEventListener("click", close));
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") close();
+    });
+    window.matchMedia("(min-width: 601px)").addEventListener("change", close);
+  }
+</script>
