@@ -2,7 +2,7 @@ const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 function reveal(block: HTMLElement) {
   const items = block.querySelectorAll<HTMLElement>(
-    ".viz-node, .viz-card, .viz-tier, .viz-pool, .viz-step, .viz-stat, .viz-router-core, .viz-worker",
+    ".viz-node, .viz-card, .viz-tier, .viz-pool, .viz-step, .viz-stat, .viz-router-core, .viz-worker, .viz-matrix__row, .viz-loop__step, .viz-loop__retry, .viz-receipt__row, .viz-env, .viz-shift__row",
   );
 
   items.forEach((item, index) => {
