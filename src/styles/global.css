@@ -811,15 +811,15 @@ article p {
     background:
       linear-gradient(
         to bottom,
-        var(--bg) 72px,
-        color-mix(in srgb, var(--bg) 95.7%, transparent) 78.5px,
-        color-mix(in srgb, var(--bg) 84.4%, transparent) 85px,
-        color-mix(in srgb, var(--bg) 68.4%, transparent) 91.5px,
-        color-mix(in srgb, var(--bg) 50%, transparent) 98px,
-        color-mix(in srgb, var(--bg) 31.6%, transparent) 104.5px,
-        color-mix(in srgb, var(--bg) 15.6%, transparent) 111px,
-        color-mix(in srgb, var(--bg) 4.3%, transparent) 117.5px,
-        transparent 124px
+        var(--bg) 58px,
+        color-mix(in srgb, var(--bg) 95.7%, transparent) 63.75px,
+        color-mix(in srgb, var(--bg) 84.4%, transparent) 69.5px,
+        color-mix(in srgb, var(--bg) 68.4%, transparent) 75.25px,
+        color-mix(in srgb, var(--bg) 50%, transparent) 81px,
+        color-mix(in srgb, var(--bg) 31.6%, transparent) 86.75px,
+        color-mix(in srgb, var(--bg) 15.6%, transparent) 92.5px,
+        color-mix(in srgb, var(--bg) 4.3%, transparent) 98.25px,
+        transparent 104px
       ),
       linear-gradient(
         to bottom,
@@ -852,14 +852,14 @@ article p {
 
   /* header hugs the top so the painting starts right beneath it */
   .page--home {
-    padding-top: 26px;
+    padding-top: 14px;
   }
 
   /* no menu button above 600px, so the header row is shorter: drop it to
      the middle of the dark strip */
   @media (min-width: 601px) {
     .page--home {
-      padding-top: 38px;
+      padding-top: 26px;
     }
   }
 
@@ -871,7 +871,7 @@ article p {
      band height minus the header row minus three lines of display type.
      The story then starts after a clear gap of page background. */
   .page--home {
-    --head-row: 70px;
+    --head-row: 58px;
     --hero-size: clamp(2.5rem, 7.4vw, 4.75rem);
   }
 
