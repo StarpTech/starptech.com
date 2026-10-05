@@ -2263,9 +2263,12 @@ article b {
   color: var(--viz-note);
 }
 
+/* the strike takes the text's own colour, so it reads as clearly as the
+   words it crosses out */
 .viz-shift__row.is-done .viz-shift__problem {
   text-decoration: line-through;
-  text-decoration-color: var(--line-strong);
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 1px;
 }
 
 .viz-shift__row.is-now .viz-shift__state {
