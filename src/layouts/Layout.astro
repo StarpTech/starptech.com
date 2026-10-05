@@ -259,11 +259,13 @@ const structuredData = {
         <canvas id="signalField"></canvas>
       </div>
     )}
+    {spotlight && <canvas class="night-sky" aria-hidden="true" data-night-sky></canvas>}
     <slot />
     <Footer />
     <script>
       import "../scripts/agent.client.ts";
       import "../scripts/inference-viz.client.ts";
+      import "../scripts/night-sky.client.ts";
       import "../scripts/signal-field.client.ts";
     </script>
   </body>

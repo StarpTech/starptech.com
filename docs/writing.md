@@ -13,8 +13,15 @@ The visual language behind them is in the [style guide](style-guide.md).
   (category · date · minutes), the title in display weight, the description
   in muted text. No row dividers; spacing does the separating.
 - `spotlight` is on: `body.has-spotlight` paints the night-sky wash, a warm
-  breath top-right, and a dozen faint, slowly twinkling stars across the top.
-  It scrolls away with the page and must never sit behind body text.
+  breath top-right, and a dozen faint, slowly twinkling embers across the top.
+  On top of that, the **night sky** canvas (`.night-sky`,
+  `src/scripts/night-sky.client.ts`) paints a blue nebula rising through the
+  right margin, dusted with pale stars, with warm orange stars around it and
+  one bright orange star with a faint four-point flare near its top. It is
+  seeded (identical on every visit), redrawn only on width changes, and
+  dissolves with the eased ramp. From 1100px the nebula sits in the margin
+  beside the text column; below that it leans on the right edge at 60%
+  opacity. It scrolls away with the page and must never sit behind body text.
 - Posts end with **previous / next** (`.post-neighbours`): a faint gold
   horizon line above, tiny uppercase mono labels with a dim gold `✦`, and the
   titles in soft sans (0.95rem, weight 500). Quiet, never prominent; no
@@ -56,22 +63,34 @@ family. Keep every new diagram inside this family so posts stay consistent.
 </figure>
 ```
 
-- The figure is the **soft panel with a gold horizon**; the caption gets the
-  gold `✦` automatically.
+- **Quiet figures.** The header's night sky already carries the colour, so
+  diagrams step back: no panel, no washes, stars, or gold horizon. The figure
+  is framed by a hairline above and below; the caption is muted mono with a
+  dim `✦`.
+- Blocks (`.viz-card`, `.viz-node`, `.viz-step`, `.viz-pool`, `.viz-tier`,
+  `.viz-worker`, `.viz-env`) are a single `--line` outline, radius 6px, no
+  fill, no shadow. Row diagrams (`.viz-matrix`, `.viz-loop`, `.viz-shift`)
+  are tables: rows split by hairlines, never a stack of cards. Small labels
+  in a line (`.viz-stat`, `.viz-envs__foot`) are mono text joined by `·`,
+  not pills.
+- **Readable first:** values 0.92rem, notes 0.76rem, labels and kickers no
+  smaller than ~0.66rem. Secondary text uses `--viz-note` (lighter than
+  `--muted`, ≥4.5:1 on the page), never `--muted`.
 - Use the shared variables, never raw colors: `--viz-accent` (gold),
-  `--viz-accent-2` (moonlit blue), `--viz-warm` (coral), `--viz-line`,
-  `--viz-dim`, `--viz-surface`, `--viz-radius` (8px).
-- Building blocks: `.viz-card`, `.viz-node`, `.viz-step`, `.viz-pool`,
-  `.viz-tier`, `.viz-kicker` (tiny mono label), `strong` (mono value),
-  `small` (mono note), `.viz-link` + `.viz-packet` (a dashed connector with a
-  glowing point of light travelling along it). Highlight one element with
-  `.is-hot` (gold) — one per diagram, at most two.
-- Semantics of color: gold = the thing that matters / the answer; blue =
-  secondary or "done"; coral = failure, finding, or open question.
-- Motion: `src/scripts/inference-viz.client.ts` adds `.is-active` when the
-  figure scrolls into view and staggers a reveal of the building blocks
-  (add new block classes to its selector). Continuous animations only run
-  under `.is-active` and stop under reduced motion.
+  `--viz-warm` (coral), `--viz-note`, `--viz-line`, `--viz-line-strong`,
+  `--viz-radius`.
+  Building blocks: `.viz-kicker` (tiny uppercase mono label), `strong` (mono
+  value), `small` (mono note), `.viz-link` (a plain hairline with a small
+  arrowhead).
+- **Color:** monochrome, plus **one** gold element per diagram (`.is-hot`,
+  `.is-selected`): a gold outline and kicker, or a gold mark. Gold goes to
+  the answer, not to the thing that chooses it (a router stays neutral; the
+  replica it picks is gold). Coral only for a failure or open question, as
+  text and outline, never a fill. No blue.
+- **Motion:** `src/scripts/inference-viz.client.ts` adds `.is-active` when
+  the figure scrolls into view and staggers a one-time fade-in of the blocks
+  (add new block classes to its selector). Nothing loops: no pulses, glows,
+  travelling packets, or progress bars.
 - Mobile (≤540px): grids collapse to one column; horizontal flows become
   vertical (links rotate). Check every diagram at 375px for horizontal scroll.
 - Mark illustrative data as illustrative in the caption.

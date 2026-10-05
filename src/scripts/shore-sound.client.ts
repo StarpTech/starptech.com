@@ -47,6 +47,26 @@ function initShoreSound(button: HTMLButtonElement) {
       .then((data) => audio().decodeAudioData(data));
   }
 
+  /* AAC (like MP3) pads a few milliseconds of silence onto both ends of a
+     file. Find where the sound really starts and ends, so the loop wraps
+     without a hitch and the cue doesn't lag the click. */
+  function audible(buffer: AudioBuffer): [number, number] {
+    const threshold = 1e-4;
+    let first = buffer.length;
+    let last = 0;
+    for (let c = 0; c < buffer.numberOfChannels; c++) {
+      const data = buffer.getChannelData(c);
+      let i = 0;
+      while (i < data.length && Math.abs(data[i]) < threshold) i++;
+      let j = data.length - 1;
+      while (j > i && Math.abs(data[j]) < threshold) j--;
+      first = Math.min(first, i);
+      last = Math.max(last, j);
+    }
+    if (first >= last) return [0, buffer.duration];
+    return [first / buffer.sampleRate, (last + 1) / buffer.sampleRate];
+  }
+
   function fadeTo(level: number, seconds: number) {
     if (!context || !master) return;
     const now = context.currentTime;
@@ -63,11 +83,14 @@ function initShoreSound(button: HTMLButtonElement) {
     if (!on) return;
 
     if (!loopSource) {
+      const [loopStart, loopEnd] = audible(buffer);
       loopSource = ctx.createBufferSource();
       loopSource.buffer = buffer;
       loopSource.loop = true;
+      loopSource.loopStart = loopStart;
+      loopSource.loopEnd = loopEnd;
       loopSource.connect(master!);
-      loopSource.start();
+      loopSource.start(0, loopStart);
     }
     fadeTo(LOOP_LEVEL, 2.5);
   }
@@ -129,7 +152,7 @@ function initShoreSound(button: HTMLButtonElement) {
       master.gain.setValueAtTime(DUCK_LEVEL, now + buffer.duration - 0.6);
       master.gain.linearRampToValueAtTime(LOOP_LEVEL, now + buffer.duration + 1.2);
     }
-    source.start();
+    source.start(0, audible(buffer)[0]);
   });
 
   render();
