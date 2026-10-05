@@ -40,11 +40,11 @@
   --muted: #737578;
   --line: #2b2a29;
   --line-strong: #444240;
-  --accent: #73a8d8;
-  --writing-accent: #73a8d8;
+  /* one accent for every link, hover, focus ring, and selection: the gold
+     of the surf. Moonlit blue lives only inside diagrams. */
+  --accent: #e8b56c;
+  --writing-accent: #e8b56c;
   --writing-accent-2: #c2c5ca;
-  --signal-accent-1: #73a8d8;
-  --signal-accent-2: #a9c9e6;
   /* Second hero line: a touch warm, between the white headline and the
      painting. */
   --text-hero: #aaa6a0;
@@ -87,6 +87,12 @@ html {
   background: var(--bg);
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 body {
   position: relative;
   min-height: 100svh;
@@ -104,53 +110,58 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-body.has-spotlight::before {
-  content: "";
-  position: fixed;
-  top: -2rem;
-  left: 50%;
-  width: min(88rem, 118vw);
-  height: min(68rem, 100svh);
-  z-index: 0;
-  pointer-events: none;
-  transform: translateX(-50%);
-  clip-path: polygon(44% 0, 56% 0, 86% 100%, 14% 100%);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--signal-accent-1) 9%, transparent) 0%,
-    color-mix(in srgb, var(--signal-accent-2) 4%, transparent) 54%,
-    transparent 94%
-  );
-  filter: blur(30px);
-  opacity: 0.12;
-}
-
+/* Writing pages: a quiet echo of the homepage painting. The night sky
+   bleeds in from the top-left, a breath of the gold surf sits top-right, and
+   a few faint stars hang in the band. It scrolls away with the page. */
+body.has-spotlight::before,
 body.has-spotlight::after {
   content: "";
-  position: fixed;
-  top: -7rem;
-  left: 50%;
-  width: min(44rem, 82vw);
-  height: 17rem;
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: min(52rem, 110vh);
   z-index: 0;
   pointer-events: none;
-  transform: translateX(-50%);
-  background: radial-gradient(
-    ellipse at 50% 50%,
-    color-mix(in srgb, var(--signal-accent-1) 12%, transparent),
-    color-mix(in srgb, var(--signal-accent-2) 5%, transparent) 40%,
-    transparent 72%
-  );
-  filter: blur(18px);
-  opacity: 0.16;
 }
 
 body.has-spotlight::before {
-  opacity: 0.18;
+  background:
+    radial-gradient(ellipse 60% 70% at 10% -12%, rgb(42 64 156 / 0.2), transparent 70%),
+    radial-gradient(ellipse 80% 55% at 50% -22%, rgb(24 34 92 / 0.22), transparent 75%),
+    radial-gradient(ellipse 40% 38% at 94% 4%, rgb(214 150 72 / 0.07), transparent 70%);
 }
 
 body.has-spotlight::after {
-  opacity: 0.22;
+  background:
+    radial-gradient(1.4px 1.4px at 7% 11%, rgb(255 228 176 / 0.7), transparent),
+    radial-gradient(1px 1px at 14% 26%, rgb(220 230 255 / 0.55), transparent),
+    radial-gradient(1.2px 1.2px at 22% 7%, rgb(255 236 200 / 0.5), transparent),
+    radial-gradient(1px 1px at 31% 18%, rgb(255 228 176 / 0.45), transparent),
+    radial-gradient(1.6px 1.6px at 41% 4%, rgb(255 240 214 / 0.6), transparent),
+    radial-gradient(1px 1px at 55% 14%, rgb(220 230 255 / 0.4), transparent),
+    radial-gradient(1.2px 1.2px at 63% 6%, rgb(255 228 176 / 0.5), transparent),
+    radial-gradient(1px 1px at 72% 21%, rgb(255 236 200 / 0.45), transparent),
+    radial-gradient(1.5px 1.5px at 81% 9%, rgb(255 222 160 / 0.65), transparent),
+    radial-gradient(1px 1px at 88% 30%, rgb(220 230 255 / 0.4), transparent),
+    radial-gradient(1.2px 1.2px at 95% 16%, rgb(255 236 200 / 0.5), transparent),
+    radial-gradient(1px 1px at 3% 38%, rgb(255 228 176 / 0.35), transparent);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 70%);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 70%);
+  animation: skyTwinkle 9s ease-in-out infinite alternate;
+}
+
+@keyframes skyTwinkle {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.has-spotlight::after {
+    animation: none;
+  }
 }
 
 ::selection {
@@ -618,6 +629,9 @@ article p {
   inset: 0 auto 0 0;
   z-index: 0;
   width: clamp(340px, 40vw, 700px);
+  /* whole pixels, or the drifting layer and the fade clip differently at a
+     fractional edge and a 1px line of painting shows through */
+  width: round(down, clamp(340px, 40vw, 700px), 1px);
   overflow: hidden;
   /* a hard clip: the drifting, scaled layer can otherwise bleed a pixel */
   clip-path: inset(0);
@@ -752,6 +766,109 @@ article p {
   opacity: 0;
 }
 
+/* The shore's sound: a small round glass icon button in the bottom-left
+   corner, off on every visit. Readable at rest, gold when on, the speaker's waves breathing
+   slowly. */
+.shore-sound {
+  position: fixed;
+  left: clamp(14px, 2.4vw, 28px);
+  /* clear of any browser toolbar floating over the bottom of the page */
+  bottom: max(clamp(14px, 2.4vw, 28px), calc(env(safe-area-inset-bottom) + 12px));
+  z-index: 15;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid rgb(236 222 200 / 0.2);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-1) 78%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px -18px rgb(0 0 0 / 0.8);
+  color: var(--text-soft);
+  cursor: pointer;
+  transition:
+    color var(--transition-ui),
+    border-color var(--transition-ui),
+    background-color var(--transition-ui);
+}
+
+.shore-sound svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.shore-sound__wave {
+  opacity: 0;
+}
+
+.shore-sound:hover,
+.shore-sound:focus-visible {
+  color: var(--text);
+  border-color: rgb(236 222 200 / 0.35);
+}
+
+.shore-sound.is-on {
+  color: var(--accent);
+  border-color: rgb(232 181 108 / 0.4);
+  background-color: color-mix(in srgb, rgb(232 181 108) 8%, var(--bg-1));
+}
+
+.shore-sound.is-on .shore-sound__mute {
+  opacity: 0;
+}
+
+.shore-sound.is-on .shore-sound__wave {
+  opacity: 1;
+  animation: soundBreathe 3.2s ease-in-out infinite;
+}
+
+.shore-sound.is-on .shore-sound__wave--2 {
+  animation-delay: 0.4s;
+}
+
+@keyframes soundBreathe {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Phones and tablets: browser toolbars float over the bottom of the page, so
+   the button sits at the bottom-right of the headline, level with its last
+   line, and scrolls away with it.
+   The negative top margin collapses with the hero's 58px bottom margin
+   (58 - 98 = -40: the button's bottom lands 4px above the last line's), and
+   the bottom margin hands the story its original 58px gap back. */
+@media (max-width: 1100px) {
+  .shore-sound {
+    position: relative;
+    top: auto;
+    bottom: auto;
+    left: auto;
+    display: flex;
+    width: 36px;
+    height: 36px;
+    margin: -98px 0 62px auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shore-sound.is-on .shore-sound__wave {
+    animation: none;
+  }
+}
+
 /* The walker is a quiet door to the other painting: no ornament, just a
    pointer for whoever finds it. */
 .shore-gem {
@@ -770,8 +887,54 @@ article p {
 }
 
 .shore-gem:focus-visible {
-  outline: 1px solid color-mix(in srgb, var(--accent) 70%, transparent);
-  outline-offset: 2px;
+  outline: none;
+}
+
+/* On hover, a hairline of light traces the walker's silhouette, with a
+   brighter glint travelling along it. */
+.shore-gem__outline {
+  position: absolute;
+  overflow: visible;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.shore-gem__outline path {
+  fill: none;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.shore-gem__edge {
+  stroke: rgb(255 244 226 / 0.5);
+  stroke-width: 1;
+  filter: drop-shadow(0 0 2px rgb(255 236 205 / 0.45));
+}
+
+.shore-gem__shine {
+  stroke: rgb(255 255 255 / 0.95);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-dasharray: 12 88;
+  stroke-dashoffset: 100;
+  filter: drop-shadow(0 0 3px rgb(255 240 215 / 0.7));
+}
+
+.shore-gem:hover .shore-gem__outline,
+.shore-gem:focus-visible .shore-gem__outline {
+  opacity: 1;
+}
+
+.shore-gem:hover .shore-gem__shine,
+.shore-gem:focus-visible .shore-gem__shine {
+  animation: gemShine 2.8s linear infinite;
+}
+
+@keyframes gemShine {
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 
@@ -898,6 +1061,10 @@ article p {
     animation: none;
     transition: none;
   }
+
+  .shore-gem__shine {
+    display: none;
+  }
 }
 
 /* prose links — visible, consistent accent underline */
@@ -992,31 +1159,29 @@ article b {
  * ------------------------------------------------------------------------- */
 
 .writing-index {
-  max-width: none;
+  max-width: 40rem;
 }
 
 .writing-index__header {
-  position: relative;
-  max-width: 40rem;
-  margin: 0 0 clamp(42px, 7vh, 64px);
+  margin: 0 0 clamp(56px, 9vh, 88px);
 }
 
 .writing-index__title {
-  max-width: 13ch;
-  margin: 0 0 20px;
-  font-size: var(--type-display);
-  line-height: 0.98;
+  max-width: 14ch;
+  margin: 0 0 18px;
+  font-size: clamp(2.2rem, 6vw, 3.6rem);
+  line-height: 1;
   font-weight: 600;
-  letter-spacing: var(--tracking-display);
+  letter-spacing: -0.05em;
   color: var(--text);
   text-wrap: balance;
 }
 
 .writing-index__intro {
-  max-width: 39ch;
+  max-width: 40ch;
   margin: 0;
-  font-size: 1.08rem;
-  line-height: 1.62;
+  font-size: 1.05rem;
+  line-height: 1.6;
   color: var(--text-soft);
 }
 
@@ -1025,75 +1190,140 @@ article b {
   font-size: 0.96rem;
 }
 
+/* Each year is a stretch of the same thread the table of contents walks:
+   a faint line, a point per note, a gold glint on the one you're over. */
+.writing-year + .writing-year {
+  margin-top: clamp(48px, 8vh, 72px);
+}
+
+.writing-year__label {
+  margin: 0 0 22px 30px;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
 .writing-list {
-  list-style: none;
+  position: relative;
+  display: grid;
+  gap: clamp(36px, 6vh, 52px);
   margin: 0;
   padding: 0;
-  border-top: 1px solid var(--line);
+  list-style: none;
 }
 
-.writing-list__item {
-  border-bottom: 1px solid var(--line);
+.writing-list::before {
+  content: "";
+  position: absolute;
+  top: 0.5rem;
+  bottom: 0;
+  left: 5px;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    rgb(236 222 200 / 0.12),
+    rgb(236 222 200 / 0.06) 80%,
+    transparent
+  );
+  pointer-events: none;
 }
 
-.writing-list__link {
-  display: grid;
-  grid-template-columns: 7rem minmax(0, 1fr);
-  gap: clamp(16px, 3vw, 32px);
-  align-items: baseline;
-  padding: 22px 0;
+.writing-entry {
+  position: relative;
+  display: block;
+  padding-left: 30px;
+  color: var(--text);
   text-decoration: none;
-  color: var(--text);
 }
 
-.writing-list__date {
+.writing-entry__star {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 11px;
+  height: 1rem;
+}
+
+.writing-entry__star::before {
+  content: "";
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgb(232 181 108 / 0.55);
+  transition: transform 0.3s ease;
+}
+
+.writing-entry__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-bottom: 10px;
   font-family: var(--mono);
-  font-size: 0.72rem;
+  font-size: 0.66rem;
+  line-height: 1rem;
+  letter-spacing: 0.03em;
+  text-transform: lowercase;
   color: var(--muted);
-  white-space: nowrap;
 }
 
-.writing-list__copy {
-  min-width: 0;
+.writing-entry__meta > span[aria-hidden="true"] {
+  color: var(--line-strong);
 }
 
-.writing-list__title {
-  margin: 0 0 6px;
-  font-size: 1.08rem;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  line-height: 1.35;
+.writing-entry__title {
+  margin: 0 0 10px;
+  font-size: clamp(1.35rem, 3vw, 1.65rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
   color: var(--text);
-  transition: color var(--transition-ui);
+  text-wrap: balance;
+  transition: color 0.3s ease;
 }
 
-.writing-list__link:hover .writing-list__title,
-.writing-list__link:focus-visible .writing-list__title {
-  color: var(--accent);
-}
-
-.writing-list__description {
-  max-width: 60ch;
+.writing-entry__description {
+  max-width: 54ch;
   margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.55;
+  font-size: 0.96rem;
+  line-height: 1.6;
   color: var(--muted);
   text-wrap: pretty;
 }
 
+.writing-entry:hover .writing-entry__title,
+.writing-entry:focus-visible .writing-entry__title {
+  color: var(--accent);
+}
+
+.writing-entry:hover .writing-entry__star::before,
+.writing-entry:focus-visible .writing-entry__star::before {
+  content: "✦";
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  font-size: 0.72rem;
+  line-height: 1;
+  color: var(--accent);
+  text-shadow: 0 0 8px rgb(232 181 108 / 0.65);
+}
+
+.writing-entry:focus-visible {
+  outline: none;
+}
+
 @media (max-width: 540px) {
-  .writing-index__header {
-    margin-bottom: 40px;
+  .writing-entry,
+  .writing-year__label {
+    padding-left: 24px;
   }
 
-  .writing-index__title {
-    max-width: 18ch;
-  }
-
-  .writing-list__link {
-    grid-template-columns: 1fr;
-    gap: 6px;
-    padding: 18px 0;
+  .writing-year__label {
+    margin-left: 0;
   }
 }
 
@@ -1108,27 +1338,9 @@ article b {
 .post__bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 16px;
   margin: 0 0 clamp(28px, 4vh, 40px);
-}
-
-.post__back {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0;
-  font-family: var(--mono);
-  font-size: var(--type-ui);
-  letter-spacing: 0.01em;
-  color: var(--muted);
-  text-decoration: none;
-  transition: color var(--transition-ui);
-}
-
-.post__back:hover,
-.post__back:focus-visible {
-  color: var(--accent);
 }
 
 /* "Copy as Markdown" — fetches the .md twin and writes it to the clipboard */
@@ -1217,42 +1429,113 @@ article b {
   text-wrap: pretty;
 }
 
+/* the share line sits right after the last sentence, before the references */
 .post__footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: clamp(40px, 6vh, 64px);
-  padding-top: clamp(20px, 3vh, 32px);
-  border-top: 1px solid var(--line);
+  margin-top: 0.4rem;
 }
 
-.post__back-bottom {
+.post__body > .post__footer {
+  margin: 0.4rem 0 0;
+}
+
+/* previous / next: the next read, as an invitation. A gold horizon above,
+   the titles in display type, no panel. */
+.post-neighbours {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+  margin-top: clamp(28px, 4.5vh, 40px);
+}
+
+.post-neighbours__link {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text-soft);
+  text-decoration: none;
+}
+
+.post-neighbours__link--newer {
+  grid-column: 2;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.post-neighbours__label {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   font-family: var(--mono);
-  font-size: var(--type-ui);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--muted);
-  text-decoration: none;
+}
+
+.post-neighbours__label::before {
+  content: "✦";
+  color: rgb(232 181 108 / 0.6);
+  font-size: 0.62rem;
+}
+
+.post-neighbours__title {
+  max-width: 30ch;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
   transition: color var(--transition-ui);
 }
 
-.post__back-bottom:hover,
-.post__back-bottom:focus-visible {
+.post-neighbours__arrow {
+  display: inline-block;
+  color: var(--muted);
+  font-weight: 400;
+  transition:
+    transform var(--transition-ui),
+    color var(--transition-ui);
+}
+
+.post-neighbours__link--older .post-neighbours__arrow {
+  margin-right: 0.3em;
+}
+
+.post-neighbours__link--newer .post-neighbours__arrow {
+  margin-left: 0.3em;
+}
+
+.post-neighbours__link:hover .post-neighbours__title,
+.post-neighbours__link:focus-visible .post-neighbours__title,
+.post-neighbours__link:hover .post-neighbours__arrow,
+.post-neighbours__link:focus-visible .post-neighbours__arrow {
   color: var(--accent);
 }
 
-.post__back > span,
-.post__back-bottom > span {
-  transition: transform var(--transition-ui);
+.post-neighbours__link--older:hover .post-neighbours__arrow,
+.post-neighbours__link--older:focus-visible .post-neighbours__arrow {
+  transform: translateX(-3px);
 }
 
-.post__back:hover > span,
-.post__back:focus-visible > span,
-.post__back-bottom:hover > span,
-.post__back-bottom:focus-visible > span {
-  transform: translateX(-2px);
+.post-neighbours__link--newer:hover .post-neighbours__arrow,
+.post-neighbours__link--newer:focus-visible .post-neighbours__arrow {
+  transform: translateX(3px);
+}
+
+@media (max-width: 540px) {
+  .post-neighbours {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .post-neighbours__link--newer {
+    grid-column: 1;
+    align-items: flex-start;
+    text-align: left;
+  }
 }
 
 .post__share {
@@ -1292,13 +1575,6 @@ article b {
   background: transparent;
 }
 
-@media (max-width: 540px) {
-  .post__footer {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-}
-
 /* -- markdown body --------------------------------------------------------- */
 
 .post__body {
@@ -1318,38 +1594,233 @@ article b {
   text-wrap: pretty;
 }
 
+/* -- breakout: diagrams and code get room, the text keeps its measure ---- */
+
+@media (min-width: 860px) {
+  /* .post raises specificity over the base figure/code margins below */
+  .post .post__body > .inference-viz,
+  .post .post__body > pre {
+    --breakout: min(46rem, calc(100vw - 4rem));
+    width: var(--breakout);
+    max-width: none;
+    margin-right: 0;
+    margin-left: calc((100% - var(--breakout)) / 2);
+  }
+}
+
+/* -- table of contents: a quiet list in the left margin on wide screens --- */
+
+.post-toc {
+  display: none;
+}
+
+@media (min-width: 1280px) {
+  /* The article becomes a grid with a margin column on the left: the table
+     of contents starts on the header's row (level with the meta line), runs
+     the length of the article, and its list sticks while you read. The text
+     column stays exactly where it was; the toc ends 8rem before it, clear of
+     the breakout figures. */
+  .post {
+    display: grid;
+    grid-template-columns: 12rem 8rem minmax(0, 1fr);
+    width: calc(100% + 20rem);
+    max-width: none;
+    margin-left: -20rem;
+  }
+
+  .post > * {
+    grid-column: 3;
+  }
+
+  .post > .post-toc {
+    grid-column: 1;
+    grid-row: 2 / span 20;
+    display: block;
+  }
+
+  .post-toc ol {
+    position: sticky;
+    top: clamp(96px, 14vh, 140px);
+  }
+
+  /* the path: a faint thread, filled with gold up to the current section */
+  .post-toc ol {
+    display: grid;
+    gap: 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .post-toc ol::before,
+  .post-toc ol::after {
+    content: "";
+    position: absolute;
+    top: 0.55rem;
+    left: 5px;
+    width: 1px;
+    pointer-events: none;
+  }
+
+  .post-toc ol::before {
+    bottom: 0.55rem;
+    background: linear-gradient(
+      to bottom,
+      rgb(236 222 200 / 0.1),
+      rgb(236 222 200 / 0.06) 85%,
+      transparent
+    );
+  }
+
+  .post-toc ol::after {
+    height: calc(var(--walked, 0px) - 0.55rem);
+    background: linear-gradient(to bottom, rgb(232 181 108 / 0.15), rgb(232 181 108 / 0.55));
+    transition: height 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .post-toc li {
+    margin: 0;
+  }
+
+  .post-toc a {
+    display: grid;
+    grid-template-columns: 11px minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .post-toc__text {
+    font-size: 0.76rem;
+    line-height: 1.4;
+    letter-spacing: -0.005em;
+    text-wrap: balance;
+  }
+
+  /* stars: dim points ahead, small gold stars behind, a glint where you are */
+  .post-toc__star {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 11px;
+    height: 1.07rem;
+  }
+
+  .post-toc__star::before {
+    content: "";
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: rgb(236 222 200 / 0.3);
+    transition:
+      background-color 0.3s ease,
+      transform 0.3s ease;
+  }
+
+  .post-toc a[data-state="read"] {
+    color: color-mix(in srgb, var(--muted) 85%, var(--text-soft));
+  }
+
+  .post-toc a[data-state="read"] .post-toc__star::before {
+    background: rgb(232 181 108 / 0.7);
+  }
+
+  .post-toc a[data-state="current"] {
+    color: var(--text);
+  }
+
+  .post-toc a[data-state="current"] .post-toc__star::before {
+    content: "✦";
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    background: none;
+    font-size: 0.72rem;
+    line-height: 1;
+    color: var(--accent);
+    text-shadow: 0 0 8px rgb(232 181 108 / 0.65);
+  }
+
+  .post-toc a:hover,
+  .post-toc a:focus-visible {
+    color: var(--text-soft);
+  }
+
+  .post-toc a:hover .post-toc__star::before {
+    transform: scale(1.4);
+  }
+
+  .post-toc a[data-state="current"]:hover {
+    color: var(--text);
+  }
+}
+
+@media (min-width: 1280px) and (prefers-reduced-motion: reduce) {
+  .post-toc ol::after {
+    transition: none;
+  }
+}
+
 /* -- lightweight inference diagrams ---------------------------------------- */
 
 .post__body .inference-viz {
-  --viz-accent: #93a4ff;
-  --viz-accent-2: #67e8f9;
-  --viz-warm: #fbbf24;
-  --viz-line: color-mix(in srgb, var(--line-strong) 88%, transparent);
-  --viz-dim: color-mix(in srgb, var(--muted) 58%, transparent);
+  /* the night-shore palette: gold surf, moonlit blue, coral for findings */
+  --viz-accent: var(--accent);
+  --viz-accent-2: #8aaaf0;
+  --viz-warm: #ff9a76;
+  --viz-line: rgb(236 222 200 / 0.13);
+  --viz-dim: color-mix(in srgb, var(--muted) 60%, transparent);
+  --viz-surface: linear-gradient(180deg, rgb(255 255 255 / 0.035), rgb(255 255 255 / 0.012));
+  --viz-radius: 8px;
 
   position: relative;
-  margin: 2em 0;
-  padding: clamp(0.85rem, 2.6vw, 1rem);
-  border: 1px dashed var(--viz-line);
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--bg-1) 36%, transparent);
+  margin: 2.2em 0;
+  padding: clamp(1rem, 3vw, 1.35rem);
+  border: 1px solid rgb(236 222 200 / 0.09);
+  border-radius: 14px;
+  background:
+    radial-gradient(1px 1px at 12% 16%, rgb(255 230 190 / 0.5), transparent),
+    radial-gradient(1px 1px at 34% 7%, rgb(220 230 255 / 0.35), transparent),
+    radial-gradient(1px 1px at 78% 11%, rgb(220 230 255 / 0.4), transparent),
+    radial-gradient(1.2px 1.2px at 92% 30%, rgb(255 230 190 / 0.45), transparent),
+    radial-gradient(ellipse 90% 70% at 0% 0%, rgb(42 64 156 / 0.16), transparent 70%),
+    radial-gradient(ellipse 60% 55% at 100% 100%, rgb(214 150 72 / 0.06), transparent 70%),
+    var(--bg-1);
+  box-shadow:
+    inset 0 1px 0 rgb(255 240 215 / 0.04),
+    0 24px 50px -34px rgb(0 0 0 / 0.7);
   font-family: var(--mono);
   overflow: hidden;
 }
 
+/* a thin gold horizon along the top edge */
+.post__body .inference-viz::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(232 181 108 / 0.45), transparent);
+  pointer-events: none;
+}
+
 .post__body .inference-viz figcaption {
-  margin: 0 0 0.9rem;
+  margin: 0 0 1rem;
   font-family: var(--mono);
   font-size: 0.68rem;
   line-height: 1.45;
   letter-spacing: 0.01em;
   text-transform: lowercase;
-  color: var(--muted);
+  color: var(--text-soft);
 }
 
 .post__body .inference-viz figcaption::before {
-  content: "// ";
-  color: var(--viz-dim);
+  content: "✦";
+  margin-right: 0.55em;
+  color: var(--viz-accent);
 }
 
 .viz-kicker {
@@ -1402,8 +1873,8 @@ article b {
 .viz-pool,
 .viz-step {
   border: 1px solid var(--viz-line);
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--bg) 54%, transparent);
+  border-radius: var(--viz-radius);
+  background: var(--viz-surface);
   box-shadow: none;
 }
 
@@ -1457,7 +1928,7 @@ article b {
   justify-content: center;
   min-height: 2rem;
   border: 1px solid var(--viz-line);
-  border-radius: 3px;
+  border-radius: var(--viz-radius);
   font-family: var(--mono);
   font-size: 0.64rem;
   color: var(--muted);
@@ -1544,16 +2015,16 @@ article b {
   left: -0.2rem;
   width: 0.42rem;
   height: 0.42rem;
-  border-radius: 1px;
+  border-radius: 50%;
   background: var(--viz-accent);
-  box-shadow: none;
+  box-shadow: 0 0 8px 1px color-mix(in srgb, var(--viz-accent) 70%, transparent);
   transform: translate(0, -50%);
   opacity: 0;
 }
 
 .viz-packet--late {
   background: var(--viz-accent-2);
-  box-shadow: none;
+  box-shadow: 0 0 8px 1px color-mix(in srgb, var(--viz-accent-2) 70%, transparent);
 }
 
 .inference-viz.is-active .viz-packet {
@@ -1589,8 +2060,8 @@ article b {
 .viz-router-core,
 .viz-worker {
   border: 1px solid var(--viz-line);
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--bg) 54%, transparent);
+  border-radius: var(--viz-radius);
+  background: var(--viz-surface);
   box-shadow: none;
 }
 
@@ -1631,8 +2102,7 @@ article b {
   justify-content: center;
   padding: 1rem;
   border-color: color-mix(in srgb, var(--viz-accent) 56%, var(--viz-line));
-  border-style: dashed;
-  background: color-mix(in srgb, var(--bg) 54%, transparent);
+  background: var(--viz-surface);
 }
 
 .viz-router-core::before,
@@ -1677,7 +2147,7 @@ article b {
   min-height: 1.8rem;
   padding: 0.28rem 0.48rem;
   border: 1px solid var(--viz-line);
-  border-radius: 3px;
+  border-radius: var(--viz-radius);
   background: transparent;
   font-family: var(--mono);
   font-size: 0.64rem;
@@ -2024,8 +2494,8 @@ article b {
 .viz-env,
 .viz-shift__row {
   border: 1px solid var(--viz-line);
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--bg) 54%, transparent);
+  border-radius: var(--viz-radius);
+  background: var(--viz-surface);
 }
 
 .viz-matrix__row {
@@ -2159,7 +2629,7 @@ article b {
   margin: 0 auto;
   padding: 0.95rem 1rem 0.85rem;
   border: 1px solid var(--viz-line);
-  border-radius: 3px;
+  border-radius: var(--viz-radius);
   background: var(--bg);
 }
 
@@ -2325,7 +2795,7 @@ article b {
 
 .viz-envs__foot span {
   padding: 0.16rem 0.5rem;
-  border: 1px dashed var(--viz-line);
+  border: 1px solid var(--viz-line);
   border-radius: 999px;
   font-size: 0.62rem;
   color: var(--muted);
@@ -2495,12 +2965,89 @@ article b {
 }
 
 .post__body h2 {
+  scroll-margin-top: 2.5rem;
   margin: 2em 0 0.6em;
   font-size: 1.5rem;
   font-weight: 600;
   letter-spacing: -0.022em;
   line-height: 1.25;
   color: var(--text);
+}
+
+/* shareable headings: a quiet link button after the title */
+.heading-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  margin-left: 0.3em;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  vertical-align: 0.1em;
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity var(--transition-ui),
+    color var(--transition-ui),
+    background-color var(--transition-ui);
+}
+
+.heading-link svg {
+  width: 0.85rem;
+  height: 0.85rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.post__body h2:hover .heading-link,
+.post__body h3:hover .heading-link,
+.heading-link:focus-visible,
+.heading-link.is-done {
+  opacity: 1;
+}
+
+.heading-link:hover,
+.heading-link:focus-visible,
+.heading-link.is-done {
+  color: var(--accent);
+  background-color: rgb(232 181 108 / 0.08);
+}
+
+.heading-link__status {
+  position: absolute;
+  left: calc(100% + 6px);
+  top: 50%;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  color: var(--accent);
+  opacity: 0;
+  transform: translate(-4px, -50%);
+  transition:
+    opacity var(--transition-ui),
+    transform var(--transition-ui);
+  pointer-events: none;
+}
+
+.heading-link.is-done .heading-link__status {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+
+@media (hover: none) {
+  .heading-link {
+    opacity: 0.5;
+  }
 }
 
 .post__body h3 {
@@ -2512,12 +3059,40 @@ article b {
   color: var(--text);
 }
 
+.post__body .post-references,
+.post__body:not(:has(.post-references)) ~ .post-neighbours {
+  position: relative;
+}
+
+/* one closing divider for the end of a note: a gold horizon above the
+   references, or above previous/next when there are none */
+.post__body .post-references::before,
+.post__body:not(:has(.post-references)) ~ .post-neighbours::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(232 181 108 / 0.22) 30%,
+    rgb(232 181 108 / 0.22) 70%,
+    transparent
+  );
+}
+
+.post__body:not(:has(.post-references)) ~ .post-neighbours {
+  margin-top: 2.8em;
+  padding-top: 1.4rem;
+}
+
 .post__body .post-references {
   display: grid;
   gap: 0.32rem;
-  margin: 2.8em 0 0;
-  padding-top: 1.1rem;
-  border-top: 1px solid var(--line);
+  margin: 3.2em 0 0;
+  padding-top: 1.4rem;
   font-family: var(--mono);
   font-size: 0.68rem;
   line-height: 1.45;
@@ -2624,9 +3199,9 @@ article b {
   position: relative;
   margin: 1.8em 0;
   padding: 2rem 1rem 1rem;
-  border: 1px dashed color-mix(in srgb, var(--line-strong) 84%, transparent);
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--bg-1) 36%, transparent);
+  border: 1px solid rgb(236 222 200 / 0.09);
+  border-radius: 12px;
+  background: var(--bg-1);
   font-family: var(--mono);
   font-size: 0.82rem;
   line-height: 1.65;
@@ -2636,7 +3211,7 @@ article b {
 }
 
 .post__body pre::before {
-  content: "// code";
+  content: "✦  code";
   position: absolute;
   top: 0.68rem;
   left: 1rem;
@@ -2655,11 +3230,7 @@ article b {
   right: 1rem;
   left: 1rem;
   height: 1px;
-  background: repeating-linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--line-strong) 84%, transparent) 0 4px,
-    transparent 4px 7px
-  );
+  background: linear-gradient(90deg, rgb(236 222 200 / 0.12), transparent);
 }
 
 .post__body pre code {

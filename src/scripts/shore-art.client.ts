@@ -9,10 +9,29 @@ type Spot = { x: number; y: number; r: number; g: number; b: number };
 type Glint = Spot & { born: number; life: number; size: number };
 type Art = "1" | "2";
 
-// where the walker stands in each painting, in image fractions
-const WALKERS: Record<Art, { x: number; y: number; h: number }> = {
-  "1": { x: 0.233, y: 0.555, h: 0.016 },
-  "2": { x: 0.427, y: 0.383, h: 0.055 },
+/* The walkers in each painting: bounding box and traced silhouette, both in
+   the painting's own pixels (1000 × 2000). */
+type Walker = { box: [number, number, number, number]; outline: string };
+const WALKERS: Record<Art, Walker[]> = {
+  "1": [
+    {
+      box: [229.3, 1097, 8.9, 27.5],
+      outline:
+        "M234 1097 L235.5 1097.5 L235.8 1100 L237 1102.5 L238 1106.2 L238.2 1111.2 L236.8 1112.5 L235.2 1113.8 L235 1118.8 L234.8 1123.8 L233.2 1124.5 L232.2 1122.5 L232 1117.5 L230.6 1113.8 L229.3 1111.2 L229.4 1106.2 L230.8 1102.5 L233.2 1100.5 L233.2 1098.2 Z",
+    },
+    {
+      box: [249.5, 1873, 9.5, 38.2],
+      outline:
+        "M253.5 1873 L254.8 1873.5 L255 1875.8 L254.5 1878 L256.8 1879.2 L258.2 1882 L259 1887 L259 1890.8 L257.5 1892.2 L256.8 1893.2 L257 1900.8 L256.5 1908.2 L255.5 1911 L254 1911.2 L253.5 1908.2 L252.8 1902 L251.8 1897 L251 1893.2 L249.8 1890.8 L249.5 1885.8 L250 1880.8 L251.8 1878.5 L252.8 1877.8 L252.5 1875.5 L252.8 1873.5 Z",
+    },
+  ],
+  "2": [
+    {
+      box: [410.5, 712, 32.5, 109.5],
+      outline:
+        "M426.5 712 L431 714 L432.5 718.5 L431.8 723.5 L430 726 L435 728 L440.5 731 L442.5 737.5 L443 746.2 L441.5 753.8 L441 762.5 L440.2 772.5 L438.2 774.5 L438.5 767.5 L439 782.5 L437 800 L435 807.5 L434.5 815 L435 819.5 L431.5 821.5 L429 817.5 L428.5 805 L428 796.2 L427 805 L426 812.5 L426.5 818.5 L423.5 820 L421.5 817.5 L420 807.5 L418.5 795 L417 780 L416.5 765 L416 762.5 L414.5 772.5 L412.5 774 L411 767.5 L410.5 755 L411 743.8 L412.5 735 L415.5 729.5 L421 726 L422 724 L421 719.5 L422 714 Z",
+    },
+  ],
 };
 const STORAGE_KEY = "shore-art";
 
@@ -27,7 +46,7 @@ function initShoreArt(root: HTMLElement) {
 
   const frameEl = root.querySelector<HTMLElement>(".shore-art__frame")!;
   const next = root.querySelector<HTMLImageElement>(".shore-art__next");
-  const gem = document.querySelector<HTMLButtonElement>("[data-shore-gem]");
+  const gems = [...document.querySelectorAll<HTMLButtonElement>("[data-shore-gem]")];
 
   let art: Art = "2";
   try {
@@ -177,43 +196,72 @@ function initShoreArt(root: HTMLElement) {
     ctx!.globalAlpha = 1;
   }
 
-  // the walker's position inside the (untransformed) frame, in CSS pixels
-  function walkerPoint() {
-    const walker = WALKERS[art];
+  // a walker's box inside the (untransformed) frame, in CSS pixels
+  function walkerBox(walker: Walker) {
+    const [bx, by, bw, bh] = walker.box;
     const w = frameEl.offsetWidth;
     const h = frameEl.offsetHeight;
     const [px, py] = getComputedStyle(img)
       .objectPosition.split(" ")
       .map((v) => (v.endsWith("%") ? parseFloat(v) / 100 : 0.5));
-    const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight);
-    const iw = img.naturalWidth * scale;
-    const ih = img.naturalHeight * scale;
-    return {
-      x: (w - iw) * px + walker.x * iw,
-      y: (h - ih) * py + walker.y * ih,
-      height: walker.h * ih,
-    };
+    const k = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+    const left = (w - img.naturalWidth * k) * px + bx * k;
+    const top = (h - img.naturalHeight * k) * py + by * k;
+    return { left, top, width: bw * k, height: bh * k, x: left + (bw * k) / 2, y: top + (bh * k) / 2 };
   }
 
-  /* Keep the door on the walker, through the frame's slow drift, in the same
-     coordinate space as the painting (fixed beside the page, or scrolling
-     with the band). */
-  function placeGem() {
-    if (!gem || !img.naturalWidth) return;
-    const point = walkerPoint();
+  /* Keep each door on its walker, through the frame's slow drift, in the
+     same coordinate space as the painting (fixed beside the page, or
+     scrolling with the band). The traced outline sits exactly on their
+     silhouette. A walker cropped out of view, or lost in the faded edge,
+     gets no door. */
+  function placeGems() {
+    if (!img.naturalWidth) return;
+    const walkers = WALKERS[art];
     const box = frameEl.getBoundingClientRect();
     const drift = box.width / frameEl.offsetWidth;
-    const x = box.left + point.x * drift;
-    const y = box.top + point.y * drift;
-    const size = Math.max(40, point.height * drift * 1.4);
-
     const fixed = getComputedStyle(root).position === "fixed";
-    gem.style.position = fixed ? "fixed" : "absolute";
-    gem.style.width = `${size * 0.7}px`;
-    gem.style.height = `${size}px`;
-    gem.style.left = `${x - size * 0.35}px`;
-    gem.style.top = `${y - size / 2 + (fixed ? 0 : window.scrollY)}px`;
-    gem.hidden = false;
+    const frameHeight = frameEl.offsetHeight;
+
+    gems.forEach((gem, index) => {
+      const walker = walkers[index];
+      const local = walker && walkerBox(walker);
+      if (!walker || !local || local.y < 0 || local.y > frameHeight * 0.95) {
+        gem.hidden = true;
+        return;
+      }
+
+      const fx = box.left + local.left * drift;
+      const fy = box.top + local.top * drift;
+      const fw = local.width * drift;
+      const fh = local.height * drift;
+      const gw = Math.max(fw + 12, 40);
+      const gh = Math.max(fh + 12, 52);
+      const gx = fx + fw / 2 - gw / 2;
+      const gy = fy + fh / 2 - gh / 2;
+
+      gem.style.position = fixed ? "fixed" : "absolute";
+      gem.style.width = `${gw}px`;
+      gem.style.height = `${gh}px`;
+      gem.style.left = `${gx}px`;
+      gem.style.top = `${gy + (fixed ? 0 : window.scrollY)}px`;
+
+      const outline = gem.querySelector<SVGSVGElement>(".shore-gem__outline");
+      if (outline) {
+        const key = `${art}:${index}`;
+        if (outline.dataset.walker !== key) {
+          const [bx, by, bw, bh] = walker.box;
+          outline.setAttribute("viewBox", `${bx} ${by} ${bw} ${bh}`);
+          outline.querySelectorAll("path").forEach((path) => path.setAttribute("d", walker.outline));
+          outline.dataset.walker = key;
+        }
+        outline.style.left = `${fx - gx}px`;
+        outline.style.top = `${fy - gy}px`;
+        outline.style.width = `${fw}px`;
+        outline.style.height = `${fh}px`;
+      }
+      gem.hidden = false;
+    });
   }
 
   const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -221,10 +269,12 @@ function initShoreArt(root: HTMLElement) {
   /* Step through the walker: the other painting opens outward from them,
      then quietly takes the place of the current one. */
   let swapping = false;
-  async function swap() {
+  async function swap(index: number) {
     if (swapping) return;
     swapping = true;
-    if (gem) gem.hidden = true;
+    const origin = walkerBox(WALKERS[art][index] ?? WALKERS[art][0]);
+    gems.forEach((gem) => (gem.hidden = true));
+    document.dispatchEvent(new CustomEvent("shore:step"));
 
     const nextArt: Art = art === "2" ? "1" : "2";
     try {
@@ -240,7 +290,6 @@ function initShoreArt(root: HTMLElement) {
       return;
     }
 
-    const origin = walkerPoint();
     frameEl.style.setProperty("--rx", `${origin.x}px`);
     frameEl.style.setProperty("--ry", `${origin.y}px`);
     next.dataset.art = nextArt;
@@ -278,7 +327,7 @@ function initShoreArt(root: HTMLElement) {
     swapping = false;
   }
 
-  gem?.addEventListener("click", swap);
+  gems.forEach((gem, index) => gem.addEventListener("click", () => swap(index)));
 
   function render(now: number) {
     ctx!.clearRect(0, 0, canvas.width, canvas.height);
@@ -296,7 +345,7 @@ function initShoreArt(root: HTMLElement) {
       if (age > 0) drawGlint(glints[i], Math.pow(Math.sin(Math.PI * age), 2));
     }
     ctx!.globalCompositeOperation = "source-over";
-    if (!swapping) placeGem();
+    if (!swapping) placeGems();
 
     if (visible) frame = requestAnimationFrame(render);
   }
@@ -318,7 +367,7 @@ function initShoreArt(root: HTMLElement) {
     }
     sample();
     layout();
-    placeGem();
+    placeGems();
     start();
   }
 
@@ -330,7 +379,7 @@ function initShoreArt(root: HTMLElement) {
     "resize",
     () => {
       layout();
-      placeGem();
+      placeGems();
     },
     { passive: true },
   );

@@ -1,0 +1,24 @@
+---
+/* The shore's sound: off on every visit until the visitor asks for it. */
+---
+
+<button
+  class="shore-sound"
+  type="button"
+  aria-pressed="false"
+  aria-label="Turn the shore sound on"
+  data-shore-sound
+  data-loop="/sounds/shore.mp3"
+  data-step="/sounds/step.mp3"
+>
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path class="shore-sound__speaker" d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
+    <path class="shore-sound__wave shore-sound__wave--1" d="M15.5 9.2a4 4 0 0 1 0 5.6" />
+    <path class="shore-sound__wave shore-sound__wave--2" d="M18 6.8a7.5 7.5 0 0 1 0 10.4" />
+    <path class="shore-sound__mute" d="M16 9.5l5 5M21 9.5l-5 5" />
+  </svg>
+</button>
+
+<script>
+  import "../scripts/shore-sound.client.ts";
+</script>

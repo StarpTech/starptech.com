@@ -9,10 +9,18 @@ const posts = (await getCollection("blog"))
 
 const fmt = (d: Date) =>
   d.toLocaleDateString("en", {
-    year: "numeric",
     month: "short",
     day: "numeric",
   });
+
+const readingMinutes = (body: string) =>
+  Math.max(1, Math.round(body.split(/\s+/g).filter(Boolean).length / 220));
+
+// newest year first; each year is one stretch of the thread
+const years = [...new Set(posts.map((post) => post.data.date.getFullYear()))].map((year) => ({
+  year,
+  posts: posts.filter((post) => post.data.date.getFullYear() === year),
+}));
 ---
 
 <Layout
@@ -21,16 +29,14 @@ const fmt = (d: Date) =>
   ogType="website"
   schemaType="CollectionPage"
   headline="Writing"
-  spotlight={false}
+  spotlight
 >
   <main class="page page--writing" id="content">
     <Masthead active="writing" />
 
     <article class="writing-index">
       <header class="writing-index__header">
-        <h1 class="writing-index__title">
-          Where systems meet reality.
-        </h1>
+        <h1 class="writing-index__title">Where systems meet reality.</h1>
         <p class="writing-index__intro">
           Architecture, inference, APIs, and the uncomfortable parts of shipping them.
         </p>
@@ -40,21 +46,29 @@ const fmt = (d: Date) =>
         posts.length === 0 ? (
           <p class="writing-index__empty">Nothing published yet.</p>
         ) : (
-          <ul class="writing-list" role="list">
-            {posts.map((post) => (
-              <li class="writing-list__item">
-                <a href={`/blog/${post.slug}/`} class="writing-list__link">
-                  <time class="writing-list__date" datetime={post.data.date.toISOString()}>
-                    {fmt(post.data.date)}
-                  </time>
-                  <div class="writing-list__copy">
-                    <h2 class="writing-list__title">{post.data.title}</h2>
-                    <p class="writing-list__description">{post.data.description}</p>
-                  </div>
-                </a>
-              </li>
-            ))}
-          </ul>
+          years.map(({ year, posts: notes }) => (
+            <section class="writing-year" aria-labelledby={`year-${year}`}>
+              <h2 class="writing-year__label" id={`year-${year}`}>{year}</h2>
+              <ol class="writing-list" role="list">
+                {notes.map((post) => (
+                  <li>
+                    <a href={`/blog/${post.slug}/`} class="writing-entry">
+                      <span class="writing-entry__star" aria-hidden="true" />
+                      <span class="writing-entry__meta">
+                        <span>{post.data.category}</span>
+                        <span aria-hidden="true">·</span>
+                        <time datetime={post.data.date.toISOString()}>{fmt(post.data.date)}</time>
+                        <span aria-hidden="true">·</span>
+                        <span>{readingMinutes(post.body)} min</span>
+                      </span>
+                      <h3 class="writing-entry__title">{post.data.title}</h3>
+                      <p class="writing-entry__description">{post.data.description}</p>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ))
         )
       }
     </article>

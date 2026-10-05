@@ -16,7 +16,16 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { Content } = await post.render();
+const { Content, headings } = await post.render();
+const sections = headings.filter((heading) => heading.depth === 2);
+
+// neighbours in time: the older note and the newer one
+const timeline = (await getCollection("blog"))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const position = timeline.findIndex((p) => p.slug === post.slug);
+const newer = position > 0 ? timeline[position - 1] : undefined;
+const older = position < timeline.length - 1 ? timeline[position + 1] : undefined;
 
 const fmt = (d: Date) =>
   d.toLocaleDateString("en", {
@@ -46,17 +55,13 @@ const linkedInShareHref = `https://www.linkedin.com/sharing/share-offsite/?url=$
   section={post.data.category}
   tags={[post.data.category]}
   ogImageAlt={`Social preview for ${post.data.title}`}
-  spotlight={false}
+  spotlight
 >
   <main class="page" id="content">
     <Masthead active="writing" />
 
     <article class="post">
       <div class="post__bar">
-        <a href="/blog" class="post__back" aria-label="Back to writing">
-          <span aria-hidden="true">←</span> writing
-        </a>
-
         <button
           class="post__copy"
           type="button"
@@ -81,6 +86,21 @@ const linkedInShareHref = `https://www.linkedin.com/sharing/share-offsite/?url=$
         </button>
       </div>
 
+      {sections.length > 2 && (
+        <nav class="post-toc" aria-label="On this page" data-post-toc>
+          <ol role="list">
+            {sections.map((heading) => (
+              <li>
+                <a href={`#${heading.slug}`} data-toc-link={heading.slug}>
+                  <span class="post-toc__star" aria-hidden="true"></span>
+                  <span class="post-toc__text">{heading.text}</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )}
+
       <header class="post__header">
         <p class="post__meta">
           <span>{post.data.category}</span>
@@ -93,20 +113,150 @@ const linkedInShareHref = `https://www.linkedin.com/sharing/share-offsite/?url=$
         <p class="post__lede">{post.data.description}</p>
       </header>
 
+
       <div class="post__body">
         <Content />
       </div>
 
       <footer class="post__footer">
-        <a href="/blog" class="post__back-bottom">
-          <span aria-hidden="true">←</span> back to writing
-        </a>
         <div class="post__share" aria-label="Share this post">
           <span>share</span>
           <a href={xShareHref} target="_blank" rel="noreferrer">X</a>
           <a href={linkedInShareHref} target="_blank" rel="noreferrer">LinkedIn</a>
         </div>
       </footer>
+      <script is:inline>
+        // the share line belongs right after the last sentence: ahead of the
+        // references, which live inside the markdown body
+        (function () {
+          var share = document.currentScript.previousElementSibling;
+          var refs = document.querySelector(".post__body > .post-references");
+          if (share && refs) refs.before(share);
+        })();
+      </script>
+
+      {(older || newer) && (
+        <nav class="post-neighbours" aria-label="More writing">
+          {older ? (
+            <a class="post-neighbours__link post-neighbours__link--older" href={`/blog/${older.slug}/`}>
+              <span class="post-neighbours__label">previous</span>
+              <span class="post-neighbours__title">
+                <span class="post-neighbours__arrow" aria-hidden="true">←</span>
+                {older.data.title}
+              </span>
+            </a>
+          ) : (
+            <span />
+          )}
+          {newer && (
+            <a class="post-neighbours__link post-neighbours__link--newer" href={`/blog/${newer.slug}/`}>
+              <span class="post-neighbours__label">next</span>
+              <span class="post-neighbours__title">
+                {newer.data.title}
+                <span class="post-neighbours__arrow" aria-hidden="true">→</span>
+              </span>
+            </a>
+          )}
+        </nav>
+      )}
+
     </article>
   </main>
 </Layout>
+
+<script>
+  /* The table of contents is a constellation walked top to bottom: sections
+     behind you are lit, the current one glints, and the path fills with gold
+     up to where you are. "Current" is the last heading that has scrolled past
+     the upper third of the screen. */
+  const toc = document.querySelector<HTMLElement>("[data-post-toc]");
+  if (toc) {
+    const path = toc.querySelector<HTMLElement>("ol")!;
+    const links = [...toc.querySelectorAll<HTMLAnchorElement>("[data-toc-link]")];
+    const headings = links
+      .map((link) => document.getElementById(link.dataset.tocLink ?? ""))
+      .filter((heading): heading is HTMLElement => Boolean(heading));
+
+    const update = () => {
+      const line = window.innerHeight * 0.33;
+      let current = 0;
+      headings.forEach((heading, index) => {
+        if (heading.getBoundingClientRect().top <= line) current = index;
+      });
+
+      links.forEach((link, index) => {
+        link.dataset.state = index < current ? "read" : index === current ? "current" : "ahead";
+        link.toggleAttribute("aria-current", index === current);
+      });
+
+      const star = links[current]?.querySelector<HTMLElement>(".post-toc__star");
+      if (star) {
+        const reach = star.getBoundingClientRect().top + star.offsetHeight / 2 - path.getBoundingClientRect().top;
+        path.style.setProperty("--walked", `${Math.max(0, reach)}px`);
+      }
+    };
+
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
+    update();
+  }
+</script>
+
+<script>
+  /* Every section heading can be shared: a quiet link button after the title
+     copies a deep link (or opens the share sheet on touch devices). */
+  const icon =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L11.5 4.4"/><path d="M14 11a5 5 0 0 0-7.07 0l-2.83 2.83a5 5 0 0 0 7.07 7.07l1.33-1.3"/></svg>';
+  const touch = window.matchMedia("(hover: none)").matches;
+
+  // the async clipboard API, with the old selection-based copy as a fallback
+  async function copy(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      const field = document.createElement("textarea");
+      field.value = text;
+      field.setAttribute("readonly", "");
+      field.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+      document.body.append(field);
+      field.select();
+      const ok = document.execCommand("copy");
+      field.remove();
+      return ok;
+    }
+  }
+
+  document.querySelectorAll<HTMLHeadingElement>(".post__body h2[id], .post__body h3[id]").forEach((heading) => {
+    const title = heading.textContent?.trim() ?? "";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "heading-link";
+    button.setAttribute("aria-label", `Share a link to “${title}”`);
+    button.innerHTML = `${icon}<span class="heading-link__status" aria-live="polite"></span>`;
+    heading.append(button);
+
+    const status = button.querySelector<HTMLElement>(".heading-link__status")!;
+    let reset = 0;
+
+    button.addEventListener("click", async () => {
+      const url = `${location.origin}${location.pathname}#${heading.id}`;
+      history.replaceState(null, "", `#${heading.id}`);
+
+      if (touch && navigator.share) {
+        try {
+          await navigator.share({ title: `${title} — ${document.title}`, url });
+        } catch {}
+        return;
+      }
+
+      status.textContent = (await copy(url)) ? "link copied" : "copy failed";
+      button.classList.add("is-done");
+      window.clearTimeout(reset);
+      reset = window.setTimeout(() => {
+        button.classList.remove("is-done");
+        status.textContent = "";
+      }, 1600);
+    });
+  });
+</script>

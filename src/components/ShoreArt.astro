@@ -26,7 +26,17 @@ const arts = {
   </div>
 </div>
 
-<button class="shore-gem" type="button" aria-label="Step into the other painting" data-shore-gem hidden></button>
+{
+  /* one door per walker; the busiest painting has two */
+  [0, 1].map(() => (
+    <button class="shore-gem" type="button" aria-label="Step into the other painting" data-shore-gem hidden>
+      <svg class="shore-gem__outline" aria-hidden="true" preserveAspectRatio="none">
+        <path class="shore-gem__edge" />
+        <path class="shore-gem__shine" pathLength="100" />
+      </svg>
+    </button>
+  ))
+}
 
 <script>
   import "../scripts/shore-art.client.ts";
