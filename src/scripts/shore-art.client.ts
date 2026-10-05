@@ -329,6 +329,34 @@ function initShoreArt(root: HTMLElement) {
 
   gems.forEach((gem, index) => gem.addEventListener("click", () => swap(index)));
 
+  /* A clue to the door: shortly after the painting is up, the walker's
+     outline traces once, softly, then fades. Only until the visitor has
+     stepped through once (the remembered painting says they have), never
+     in a background tab, and never under reduced motion. */
+  function hint() {
+    if (reducedMotion.matches) return;
+    try {
+      if (localStorage.getItem(STORAGE_KEY)) return;
+    } catch {}
+    if (document.visibilityState === "hidden") {
+      document.addEventListener("visibilitychange", hint, { once: true });
+      return;
+    }
+
+    window.setTimeout(() => {
+      const gem = gems.find((candidate) => !candidate.hidden);
+      if (!gem || swapping || gem.matches(":hover")) return;
+      const stop = () => gem.classList.remove("is-hinting");
+      // keyframe names are minified, so match the element: the outline's
+      // fade is the longest part of the hint
+      gem.addEventListener("animationend", (event) => {
+        if ((event.target as Element).classList.contains("shore-gem__outline")) stop();
+      });
+      gem.addEventListener("pointerenter", stop, { once: true });
+      gem.classList.add("is-hinting");
+    }, 1600);
+  }
+
   function render(now: number) {
     ctx!.clearRect(0, 0, canvas.width, canvas.height);
     ctx!.globalCompositeOperation = "lighter";
@@ -384,5 +412,5 @@ function initShoreArt(root: HTMLElement) {
     { passive: true },
   );
   reducedMotion.addEventListener("change", start);
-  ready();
+  ready().then(hint);
 }

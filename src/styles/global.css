@@ -971,6 +971,28 @@ article p {
   }
 }
 
+/* The clue after load: the hover trace, once, fading in and out. */
+.shore-gem.is-hinting .shore-gem__outline {
+  animation: gemHint 4.2s ease-in-out both;
+}
+
+.shore-gem.is-hinting .shore-gem__shine {
+  animation: gemShine 2.8s linear 0.5s 1 both;
+}
+
+@keyframes gemHint {
+  0% {
+    opacity: 0;
+  }
+  18%,
+  72% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 
 @keyframes artDrift {
   from {

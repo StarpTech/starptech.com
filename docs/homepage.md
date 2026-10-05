@@ -29,6 +29,11 @@ is in the [style guide](style-guide.md).
   painting in a soft-edged circle growing from that walker while the current
   one dims. When tracing a new figure, verify the outline against the image
   before shipping.
+  - **The clue:** ~1.6s after the painting is ready, the first visible
+    walker plays the hover trace once on its own (`.is-hinting`: fade in,
+    one glint lap, fade out, ~4s). Only until the visitor has stepped through
+    once (`localStorage["shore-art"]` is set on the first swap), never in a
+    background tab, never under reduced motion; hovering takes over at once.
 - **Sound:** made with ElevenLabs (see [development](development.md)).
   - `public/sounds/shore.mp3`: a slow, distant night-surf loop. **Never
     automatic**: off on every visit (not remembered), plays only while the
