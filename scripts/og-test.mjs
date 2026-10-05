@@ -6,6 +6,7 @@ const longTitle =
 
 const png = await renderOgImage({
   title: longTitle,
+  label: "AI infrastructure",
   meta: "May 28, 2026 · 12 min read · a very long meta line that should be clipped to one single row only",
 });
 

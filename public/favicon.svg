@@ -1,17 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
   <defs>
-    <linearGradient id="g" x1="22" y1="6" x2="10" y2="26" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#c2c5ca"/>
-      <stop offset="0.5" stop-color="#9fa5ad"/>
-      <stop offset="1" stop-color="#73a8d8"/>
+    <linearGradient id="gold" x1="16" y1="4" x2="16" y2="28" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffca90"/>
+      <stop offset="0.5" stop-color="#e8b56c"/>
+      <stop offset="1" stop-color="#d6964a"/>
     </linearGradient>
   </defs>
-  <style>
-    .bg { fill: #141516; }
-    @media (prefers-color-scheme: light) {
-      .bg { fill: #f7f7f5; }
-    }
-  </style>
-  <rect class="bg" x="0" y="0" width="32" height="32" rx="7"/>
-  <path d="M22 6.5 L10 25.5" stroke="url(#g)" stroke-width="4" stroke-linecap="round"/>
+  <rect width="32" height="32" rx="7" fill="#161514"/>
+  <path d="M16 3.5Q17.8 14.2 25.5 16Q17.8 17.8 16 28.5Q14.2 17.8 6.5 16Q14.2 14.2 16 3.5Z" fill="url(#gold)"/>
 </svg>

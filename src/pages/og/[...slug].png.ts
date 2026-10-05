@@ -17,16 +17,16 @@ export const getStaticPaths: GetStaticPaths = async () => {
     {
       params: { slug: "index" },
       props: {
-        title: "Dustin Deus",
-        meta: "Founding engineer · founder",
-        brand: null,
+        title: "I build companies.",
+        subtitle: "And the systems underneath.",
+        label: "Founder & engineer",
       },
     },
     {
       params: { slug: "blog" },
       props: {
         title: "Where systems meet reality.",
-        meta: "writing",
+        label: "Writing",
       },
     },
   ];
@@ -36,7 +36,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
     props: {
       title: post.data.title,
       meta: `${fmtDate(post.data.date)} · ${readingMeta(post.body)} min read`,
-      brand: null,
       label: post.data.category,
     },
   }));
@@ -47,8 +46,8 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const GET: APIRoute = async ({ props }) => {
   const png = await renderOgImage({
     title: props.title as string,
+    subtitle: props.subtitle as string | undefined,
     meta: props.meta as string | undefined,
-    brand: props.brand as string | null | undefined,
     label: props.label as string | undefined,
   });
 

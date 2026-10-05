@@ -16,3 +16,6 @@
   while its pane is hidden; verify the homepage art with the pane visible.
 - `src/scripts/signal-field.client.ts` (procedural shader background) is no
   longer used by any page; `three` is no longer imported anywhere.
+- `src/lib/og.ts` reads files with paths relative to `import.meta.url`
+  that start with `../../` so they resolve from both `src/lib/` and the
+  bundled `dist/chunks/`. Paths that don't go up to the repo root break the build.

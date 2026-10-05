@@ -74,3 +74,22 @@ Reuse these instead of inventing new decoration:
 - **Eased fades**: never a two-stop linear fade into the page; use the 9-stop
   smoothstep ramp (`transparent → color-mix(var(--bg) N%) … → var(--bg)`).
   Linear ramps read as a visible band.
+
+## Social preview cards
+
+`src/lib/og.ts` renders the 1200×630 Open Graph cards at build time
+(`src/pages/og/[...slug].png.ts`): the homepage painting on the right
+dissolving into the page with the eased fade, `starptech.com` (never the
+name), a gold `✦` kicker,
+and the headline. No footer line. Its colors mirror the tokens above,
+so update both when the theme changes. The painting is a committed JPEG
+crop (`src/assets/og/shore.jpg`, from `shore-2.webp`) because satori can't
+read webp. Preview changes with `npx tsx scripts/og-test.mjs`.
+
+## Icon
+
+A gold four-point star on a `--bg` tile with a faint night-sky wash
+(`public/icon.svg`, 512px). `favicon.svg` is the same star without the
+wash and stray stars so it holds at 16px; `icon-mask.svg` is its
+silhouette. `apple-touch-icon.png` (180px, iOS ignores SVG) is rendered
+from `icon.svg` with resvg as a full square (iOS rounds it); regenerate it whenever the icon changes.
